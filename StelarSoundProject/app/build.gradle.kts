@@ -13,7 +13,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -32,17 +31,31 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
-    implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.junit)
-    implementation(libs.ext.junit)
-    implementation(libs.espresso.core)
-    implementation (libs.retrofit)
-    implementation (libs.converter.gson)
-    implementation (libs.logging.interceptor)
-    implementation (libs.recyclerview)
-    implementation (libs.picasso)
+
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+    implementation ("com.google.android.material:material:1.9.0")
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel:2.6.1")
+    implementation ("androidx.lifecycle:lifecycle-livedata:2.6.1")
+
+    // Media3 (ExoPlayer)
+    implementation ("androidx.media3:media3-exoplayer:1.1.1")
+    implementation ("androidx.media3:media3-session:1.1.1")
+
+    // Networking
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // Image loading
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
+
+    // Room Database
+    implementation ("androidx.room:room-runtime:2.5.2")
+    annotationProcessor ("androidx.room:room-compiler:2.5.2")
 }
