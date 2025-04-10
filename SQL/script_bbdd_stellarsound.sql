@@ -15,11 +15,17 @@ CREATE TABLE songs (
     title VARCHAR(255),
     artist VARCHAR(255),
     album VARCHAR(255),
-    genre VARCHAR(100),
+    id_genre BIGINT UNSIGNED,
     cover_url TEXT,
     audio_url TEXT,
     created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL
+    updated_at TIMESTAMP NULL,
+	FOREIGN KEY (id_genre) REFERENCES genres(id) ON DELETE CASCADE
+);
+
+CREATE TABLE genres (
+	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	name VARCHAR(255)
 );
 
 CREATE TABLE playlists (

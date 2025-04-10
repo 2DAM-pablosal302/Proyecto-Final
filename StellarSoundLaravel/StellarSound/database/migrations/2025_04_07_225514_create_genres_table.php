@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('playlist_song', function (Blueprint $table) {
-            $table->foreignId('playlist_id')->constrained()->onDelete('cascade');
-            $table->foreignId('song_id')->constrained()->onDelete('cascade');
-            $table->primary(['playlist_id', 'song_id']);
+        Schema::create('genres', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
         });
     }
 
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('playlist_song');
+        Schema::dropIfExists('genres');
     }
 };

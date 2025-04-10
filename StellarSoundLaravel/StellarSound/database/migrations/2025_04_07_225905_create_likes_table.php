@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('likes', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('song_id')->constrained()->onDelete('cascade');
-            $table->primary(['user_id', 'song_id']);
+            $table->foreignId('id_user')->constrained('users')->onDelete('cascade');
+            $table->foreignId('song_id')->constrained('songs')->onDelete('cascade');
+            $table->primary(['id_user', 'song_id']);
         });
     }
 

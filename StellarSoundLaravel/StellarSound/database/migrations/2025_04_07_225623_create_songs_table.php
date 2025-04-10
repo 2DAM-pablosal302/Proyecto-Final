@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('artist');
-            $table->string('album')->nullable();
-            $table->string('genre')->nullable();
-            $table->text('cover_url')->nullable();
-            $table->text('audio_url')->nullable();
+            $table->string('album');
+            $table->foreignId('id_genre')->constrained('genres')->onDelete('cascade');
+            $table->text('cover_url');
+            $table->text('audio_url');
             $table->timestamps();
         });
     }

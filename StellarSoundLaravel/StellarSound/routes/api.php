@@ -1,19 +1,22 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\GenreController;
+use App\Http\Controllers\SongController;
+use App\Http\Controllers\PlaylistController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+Route::apiResource('users', UserController::class);
+Route::get('users/{user}/playlists', [UserController::class, 'playlists']);
+Route::get('users/{user}/likes', [UserController::class, 'likes']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::apiResource('genres', GenreController::class);
+Route::get('genres/{genre}/songs', [GenreController::class, 'songs']);
+
+Route::apiResource('songs', SongController::class);
+Route::post('songs/{song}/like', [SongController::class, 'like'])->middleware('auth:sanctum');
+Route::post('songs/{song}/unlike', [SongController::class, 'unlike'])->middleware('auth:sanctum');
+
+Route::apiResource('playlists', PlaylistController::class)->middleware('auth:sanctum');
+Route::post('playlists/{playlist}/add-song', [PlaylistController::class, 'addSong'])->middleware('auth:sanctum');
+Route::post('playlists/{playlist}/remove-song', [PlaylistController::class, 'removeSong'])->middleware('auth:sanctum');
