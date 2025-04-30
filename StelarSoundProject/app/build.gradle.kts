@@ -58,4 +58,23 @@ dependencies {
     // Room Database
     implementation ("androidx.room:room-runtime:2.5.2")
     annotationProcessor ("androidx.room:room-compiler:2.5.2")
+
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.logging.interceptor.v490)
+
+    implementation (libs.material.v160)
+
+    // Material Design Components
+    implementation (libs.google.material.v190)
+
+    // Lottie para animaciones
+    implementation (libs.lottie)
+
+    // Fuentes personalizadas
+    implementation (libs.core.ktx)
+
+    // CardView
+    implementation (libs.cardview)
+
 }
