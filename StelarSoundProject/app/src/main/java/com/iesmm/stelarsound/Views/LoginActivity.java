@@ -1,5 +1,6 @@
 package com.iesmm.stelarsound.Views;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -7,10 +8,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.iesmm.stelarsound.MainActivity;
+import com.iesmm.stelarsound.Models.Token;
 import com.iesmm.stelarsound.Models.User;
 import com.iesmm.stelarsound.R;
 import com.iesmm.stelarsound.Services.ApiClient;
@@ -29,6 +35,10 @@ public class LoginActivity extends AppCompatActivity {
     private float initialY;
     private float initialTouchY;
     private boolean isCardUp = false;
+    private EditText email ;
+    private EditText passwd ;
+    private Button loginbtn;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
 
         cardView = findViewById(R.id.card_view);
         View dragHandle = findViewById(R.id.drag_handle);
+        email= findViewById(R.id.email_txt);
+        passwd = findViewById(R.id.passwd);
 
         // Configuración del arrastre
         dragHandle.setOnTouchListener(new View.OnTouchListener() {
@@ -83,22 +95,37 @@ public class LoginActivity extends AppCompatActivity {
         }, 10000);
 
 
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        apiService = ApiClient.getClient().create(ApiService.class);
 
+        loginbtn = findViewById(R.id.login_button);
+        loginbtn.setOnClickListener(v -> validateLogin());
+
+    }
+
+    private void validateLogin(){
         Map<String, String> loginData = new HashMap<>();
-        loginData.put("email", "maria@musicapp.com");
-        loginData.put("password", "password");
+        loginData.put("email", email.getText().toString());
+        loginData.put("password", passwd.getText().toString());
+
+        if (email.toString().isEmpty() || passwd.toString().isEmpty()) {
+            Toast.makeText(this, "Por favor ingresa todos los campos", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Call<LoginResponse> call = apiService.login(loginData);
         call.enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful()) {
-                    String token = response.body().token;
+                    String token_txt = response.body().token;
+                    Token token = new Token();
+                    token.setBody(token_txt);
                     User user = response.body().data;
-                    Log.d("TOKEN", token);
+                    Log.d("TOKEN", token_txt);
+                    goToMain(user, token);
                 } else {
                     Log.e("LOGIN_FAIL", "Credenciales incorrectas");
+
                 }
             }
 
@@ -107,7 +134,15 @@ public class LoginActivity extends AppCompatActivity {
                 Log.e("ERROR", t.getMessage());
             }
         });
+    }
 
+    private void goToMain(User user, Token token){
+        Intent intent = new Intent(this, MainActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("usuario", user);
+        bundle.putParcelable("token", token);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 
     private void animateCardUp() {
