@@ -77,4 +77,7 @@ dependencies {
     // CardView
     implementation (libs.cardview)
 
+    implementation (libs.volley)
+
+
 }

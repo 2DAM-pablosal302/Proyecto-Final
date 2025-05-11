@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('usuarios', UserController::class);
+    Route::apiResource('users', UserController::class);
     Route::get('users/{user}/playlists', [UserController::class, 'playlists']);
     Route::get('users/{user}/likes', [UserController::class, 'likes']);
 
