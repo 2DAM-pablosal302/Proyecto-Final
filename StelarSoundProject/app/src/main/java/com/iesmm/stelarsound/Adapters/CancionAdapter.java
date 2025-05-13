@@ -43,6 +43,10 @@ public class CancionAdapter extends RecyclerView.Adapter<CancionAdapter.ViewHold
         return new ViewHolder(v);
     }
 
+    public List<Song> getCanciones() {
+        return canciones;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Song cancion = canciones.get(position);

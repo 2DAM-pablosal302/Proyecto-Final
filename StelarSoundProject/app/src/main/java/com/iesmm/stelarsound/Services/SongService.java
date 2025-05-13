@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class SongService {
 
-    private static final String URL_API = "http://192.168.0.111/api/songs"; // tu IP local
+    private static final String URL_API = "http://192.168.1.20/api/songs"; // tu IP local
 
     public interface VolleyCallback {
         void onSuccess(ArrayList<Song> lista);
@@ -27,7 +27,7 @@ public class SongService {
     }
 
     public static void obtenerCanciones(Context context,  String token, VolleyCallback callback) {
-        String url = "http://192.168.0.111:8000/api/songs";
+        String url = "http://192.168.1.20:8000/api/songs";
 
 
         RequestQueue queue = Volley.newRequestQueue(context);

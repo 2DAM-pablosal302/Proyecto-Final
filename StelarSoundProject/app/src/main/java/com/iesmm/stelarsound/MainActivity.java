@@ -1,5 +1,6 @@
 package com.iesmm.stelarsound;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,10 +10,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.iesmm.stelarsound.Adapters.CancionAdapter;
 import com.iesmm.stelarsound.Models.Song;
 import com.iesmm.stelarsound.Models.Token;
 import com.iesmm.stelarsound.Services.SongService;
+import com.iesmm.stelarsound.Views.PlayActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements CancionAdapter.On
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
         mediaPlayer = new MediaPlayer();
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
 
         SongService.obtenerCanciones(this, token.getBody(), new SongService.VolleyCallback() {
             @Override
@@ -96,6 +102,40 @@ public class MainActivity extends AppCompatActivity implements CancionAdapter.On
             Toast.makeText(this, "Error al cargar la canción", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            item -> {
+                int id = item.getItemId();
+                if(id == R.id.nav_home){
+                    item.setChecked(true);
+                    return true;
+                } else if (id == R.id.nav_search) {
+                    item.setChecked(false);
+                    return true;
+                } else if (id == R.id.nav_play) {
+                    item.setChecked(false);
+                    if(adapter != null && adapter.getCurrentlyPlayingPosition() != -1){
+                        Song currentSong = adapter.getCanciones().get(adapter.getCurrentlyPlayingPosition());
+
+                        Intent playIntent = new Intent(this, PlayActivity.class);
+
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable("current_song", currentSong);
+                        bundle.putBoolean("is_playing", mediaPlayer.isPlaying());
+                        bundle.putInt("current_position", mediaPlayer.getCurrentPosition());
+                        playIntent.putExtras(bundle);
+
+                        startActivity(playIntent);
+                    }else {
+                        Toast.makeText(MainActivity.this, "No hay ninguna canción reproduciéndose", Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                } else if (id == R.id.nav_playlists) {
+                    item.setChecked(false);
+                    return true;
+                }
+                return false;
+            };
 
     private void pauseSong() {
         if (mediaPlayer.isPlaying()) {
