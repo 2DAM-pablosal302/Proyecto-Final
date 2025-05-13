@@ -27,7 +27,7 @@ public class SongService {
     }
 
     public static void obtenerCanciones(Context context,  String token, VolleyCallback callback) {
-        String url = "http://192.168.0.111:8000/api/songs"; // Asegúrate de que esta ruta está protegida por Sanctum
+        String url = "http://192.168.0.111:8000/api/songs";
 
 
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -40,8 +40,10 @@ public class SongService {
                             JSONObject obj = response.getJSONObject(i);
                             Song song = new Song();
                             song.setTitle(obj.getString("title"));
-                            //song.setArtist(obj.getString("artista"));
-                            song.setCover(obj.getString("cover_url")); // o URL de imagen
+                            song.setArtist(obj.getString("artist"));
+                            song.setAlbum(obj.getString("album"));
+                            song.setCover(obj.getString("cover_url"));
+                            song.setAudio(obj.getString("audio_url"));
                             canciones.add(song);
                         }
                         callback.onSuccess(canciones);
