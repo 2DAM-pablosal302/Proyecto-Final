@@ -2,13 +2,16 @@ package com.iesmm.stelarsound;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import com.iesmm.stelarsound.ViewModels.SongViewModel;
 import com.iesmm.stelarsound.Views.HomeFragment;
 import com.iesmm.stelarsound.Views.PlayFragment;
 import com.iesmm.stelarsound.Views.PlaylistFragment;
@@ -17,6 +20,8 @@ import com.iesmm.stelarsound.Views.SearchFragment;
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNav;
     public MediaPlayer mediaPlayer;
+    private Handler progressHandler = new Handler();
+    private SongViewModel songViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
         mediaPlayer = new MediaPlayer();
         bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
+        songViewModel = new ViewModelProvider(this).get(SongViewModel.class);
+        startProgressUpdates();
 
         // Cargar fragment inicial si es la primera vez
         if (savedInstanceState == null) {
@@ -65,17 +72,40 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             };
 
+    private void startProgressUpdates() {
+        progressHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    int currentPosition = mediaPlayer.getCurrentPosition();
+                    songViewModel.setCurrentPosition(currentPosition);
+                }
+                progressHandler.postDelayed(this, 200); // Actualizar cada 200ms
+            }
+        }, 200);
+    }
+
+    public void pauseProgressUpdates() {
+        progressHandler.removeCallbacksAndMessages(null);
+    }
+
+    public void resumeProgressUpdates() {
+        startProgressUpdates();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
+
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        progressHandler.removeCallbacksAndMessages(null);
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;

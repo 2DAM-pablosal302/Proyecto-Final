@@ -2,12 +2,14 @@ package com.iesmm.stelarsound.Views;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.iesmm.stelarsound.Adapters.CancionAdapter;
@@ -16,6 +18,8 @@ import com.iesmm.stelarsound.Models.Song;
 import com.iesmm.stelarsound.Models.Token;
 import com.iesmm.stelarsound.R;
 import com.iesmm.stelarsound.Services.SongService;
+import com.iesmm.stelarsound.ViewModels.SongViewModel;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +28,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private CancionAdapter adapter;
     private Map<String, String> loginData = new HashMap<>();
+    private SongViewModel songViewModel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -39,6 +44,8 @@ public class HomeFragment extends Fragment {
             Token token = bundle.getParcelable("token");
             loadSongs(token);
         }
+
+        songViewModel = new ViewModelProvider(requireActivity()).get(SongViewModel.class);
 
         return view;
     }
@@ -71,16 +78,30 @@ public class HomeFragment extends Fragment {
 
         MediaPlayer mediaPlayer = mainActivity.mediaPlayer;
 
-        if (adapter.getCurrentlyPlayingPosition() == position && mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            adapter.setCurrentlyPlayingPosition(-1);
-        } else {
+        if (adapter.getCurrentlyPlayingPosition() == position) {
+            if (mediaPlayer.isPlaying()) {
+                // Pausar la reproducción
+                mediaPlayer.pause();
+                songViewModel.setIsPlaying(false);
+            } else {
+                // Reanudar la reproducción desde la posición actual
+                mediaPlayer.start();
+                songViewModel.setIsPlaying(true);
+                updateProgress(mediaPlayer); // Reanudar actualizaciones de progreso
+            }
+        }
+        // Si es una canción diferente
+        else {
+            // Si hay otra canción reproduciéndose, detenerla primero
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
-                mediaPlayer.reset();
             }
+
+            // Preparar y reproducir la nueva canción
             reproducirCancion(mediaPlayer, song.getAudio());
             adapter.setCurrentlyPlayingPosition(position);
+            songViewModel.setCurrentSong(song);
+            songViewModel.setIsPlaying(true);
         }
     }
 
@@ -90,12 +111,15 @@ public class HomeFragment extends Fragment {
             mediaPlayer.setDataSource(audioUrl);
             mediaPlayer.prepareAsync();
 
-            mediaPlayer.setOnPreparedListener(mp -> mp.start());
+            mediaPlayer.setOnPreparedListener(mp -> {
+                songViewModel.setSongDuration(mp.getDuration());
+                mp.start();
+                songViewModel.setIsPlaying(true);
+            });
 
             mediaPlayer.setOnCompletionListener(mp -> {
-                if (adapter != null) {
-                    adapter.setCurrentlyPlayingPosition(-1);
-                }
+                adapter.setCurrentlyPlayingPosition(-1);
+                songViewModel.setIsPlaying(false);
             });
 
             mediaPlayer.setOnErrorListener((mp, what, extra) -> {
@@ -105,5 +129,24 @@ public class HomeFragment extends Fragment {
         } catch (Exception e) {
             Toast.makeText(getContext(), "Error al cargar la canción", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void updateProgress(MediaPlayer mediaPlayer) {
+        Handler handler = new Handler();
+        Runnable updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mediaPlayer.isPlaying()) {
+                    int currentPos = mediaPlayer.getCurrentPosition();
+                    songViewModel.setCurrentPosition(currentPos);
+
+                    // Programar la próxima actualización
+                    handler.postDelayed(this, 1000); // Actualizar cada segundo
+                }
+            }
+        };
+
+        // Iniciar las actualizaciones
+        handler.post(updateRunnable);
     }
 }
