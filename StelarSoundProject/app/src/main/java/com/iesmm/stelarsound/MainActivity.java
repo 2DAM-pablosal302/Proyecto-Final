@@ -1,147 +1,69 @@
 package com.iesmm.stelarsound;
 
-import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.iesmm.stelarsound.Adapters.CancionAdapter;
-import com.iesmm.stelarsound.Models.Song;
-import com.iesmm.stelarsound.Models.Token;
-import com.iesmm.stelarsound.Services.SongService;
-import com.iesmm.stelarsound.Views.PlayActivity;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import com.iesmm.stelarsound.Views.HomeFragment;
+import com.iesmm.stelarsound.Views.PlayFragment;
+import com.iesmm.stelarsound.Views.PlaylistFragment;
+import com.iesmm.stelarsound.Views.SearchFragment;
 
-public class MainActivity extends AppCompatActivity implements CancionAdapter.OnPlayButtonClickListener {
-    private Map<String, String> loginData;
-    private RecyclerView recyclerView;
-    private CancionAdapter adapter;
-    private MediaPlayer mediaPlayer;
+public class MainActivity extends AppCompatActivity {
+    private BottomNavigationView bottomNav;
+    public MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Bundle bundle = getIntent().getExtras();
-        Token token = bundle.getParcelable("token");
-
-        loginData = new HashMap<>();
-        recyclerView = findViewById(R.id.popularRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
         mediaPlayer = new MediaPlayer();
-
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        SongService.obtenerCanciones(this, token.getBody(), new SongService.VolleyCallback() {
-            @Override
-            public void onSuccess(ArrayList<Song> lista) {
-                Log.d("MainActivity", "Canciones recibidas: " + lista.size());
-                adapter = new CancionAdapter(MainActivity.this, lista);
-                recyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onError(String mensaje) {
-                Toast.makeText(MainActivity.this, "Error: " + mensaje, Toast.LENGTH_LONG).show();
-                Log.d("ERROR VOLLEY", mensaje);
-            }
-        });
-    }
-
-    @Override
-    public void onPlayButtonClick(int position, Song song) {
-        if (adapter == null) return;
-
-        // Si la misma canción ya se está reproduciendo, pausar
-        if (adapter.getCurrentlyPlayingPosition() == position && mediaPlayer.isPlaying()) {
-            pauseSong();
-            adapter.setCurrentlyPlayingPosition(-1);
-        } else {
-            // Si hay otra canción reproduciéndose, detenerla primero
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-                mediaPlayer.reset();
-            }
-
-            // Reproducir la nueva canción
-            playSong(song.getAudio());
-            adapter.setCurrentlyPlayingPosition(position);
-        }
-    }
-
-    private void playSong(String audioUrl) {
-        try {
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(audioUrl);
-            mediaPlayer.prepareAsync();
-
-            mediaPlayer.setOnPreparedListener(mp -> mp.start());
-
-            mediaPlayer.setOnCompletionListener(mp -> {
-                adapter.setCurrentlyPlayingPosition(-1);
-            });
-
-            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                Toast.makeText(this, "Error al reproducir la canción", Toast.LENGTH_SHORT).show();
-                return false;
-            });
-        } catch (IOException e) {
-            Toast.makeText(this, "Error al cargar la canción", Toast.LENGTH_SHORT).show();
+        // Cargar fragment inicial si es la primera vez
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new HomeFragment())
+                    .commit();
         }
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             item -> {
+                Fragment selectedFragment = null;
                 int id = item.getItemId();
                 if(id == R.id.nav_home){
-                    item.setChecked(true);
-                    return true;
+                    selectedFragment = new HomeFragment();
                 } else if (id == R.id.nav_search) {
-                    item.setChecked(false);
-                    return true;
+                    selectedFragment = new SearchFragment();
                 } else if (id == R.id.nav_play) {
-                    item.setChecked(false);
-                    if(adapter != null && adapter.getCurrentlyPlayingPosition() != -1){
-                        Song currentSong = adapter.getCanciones().get(adapter.getCurrentlyPlayingPosition());
-
-                        Intent playIntent = new Intent(this, PlayActivity.class);
-
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable("current_song", currentSong);
-                        bundle.putBoolean("is_playing", mediaPlayer.isPlaying());
-                        bundle.putInt("current_position", mediaPlayer.getCurrentPosition());
-                        playIntent.putExtras(bundle);
-
-                        startActivity(playIntent);
-                    }else {
-                        Toast.makeText(MainActivity.this, "No hay ninguna canción reproduciéndose", Toast.LENGTH_SHORT).show();
+                    if (mediaPlayer.isPlaying()) {
+                        selectedFragment = new PlayFragment();
+                    } else {
+                        Toast.makeText(this, "No hay ninguna canción reproduciéndose", Toast.LENGTH_SHORT).show();
+                        return false;
                     }
-                    return true;
                 } else if (id == R.id.nav_playlists) {
-                    item.setChecked(false);
+                    selectedFragment = new PlaylistFragment();
                     return true;
                 }
-                return false;
-            };
 
-    private void pauseSong() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-        }
-    }
+
+                if (selectedFragment != null) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, selectedFragment)
+                            .commit();
+                }
+
+                return true;
+            };
 
     @Override
     protected void onPause() {

@@ -27,6 +27,9 @@ public class CancionAdapter extends RecyclerView.Adapter<CancionAdapter.ViewHold
         void onPlayButtonClick(int position, Song song);
     }
 
+    public void setPlayButtonClickListener(OnPlayButtonClickListener listener) {
+        this.playButtonClickListener = listener;
+    }
     public CancionAdapter(Context context, List<Song> canciones) {
         this.context = context;
         this.canciones = canciones;
