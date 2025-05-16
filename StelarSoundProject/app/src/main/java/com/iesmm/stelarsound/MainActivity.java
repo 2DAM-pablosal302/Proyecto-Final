@@ -2,105 +2,95 @@ package com.iesmm.stelarsound;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.iesmm.stelarsound.Adapters.CancionAdapter;
-import com.iesmm.stelarsound.Models.Song;
-import com.iesmm.stelarsound.Models.Token;
-import com.iesmm.stelarsound.Services.SongService;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import com.iesmm.stelarsound.ViewModels.SongViewModel;
+import com.iesmm.stelarsound.Views.HomeFragment;
+import com.iesmm.stelarsound.Views.PlayFragment;
+import com.iesmm.stelarsound.Views.PlaylistFragment;
+import com.iesmm.stelarsound.Views.SearchFragment;
 
-public class MainActivity extends AppCompatActivity implements CancionAdapter.OnPlayButtonClickListener {
-    private Map<String, String> loginData;
-    private RecyclerView recyclerView;
-    private CancionAdapter adapter;
-    private MediaPlayer mediaPlayer;
+public class MainActivity extends AppCompatActivity {
+    private BottomNavigationView bottomNav;
+    public MediaPlayer mediaPlayer;
+    private Handler progressHandler = new Handler();
+    private SongViewModel songViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Bundle bundle = getIntent().getExtras();
-        Token token = bundle.getParcelable("token");
-
-        loginData = new HashMap<>();
-        recyclerView = findViewById(R.id.popularRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
         mediaPlayer = new MediaPlayer();
+        bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav.setOnNavigationItemSelectedListener(navListener);
+        songViewModel = new ViewModelProvider(this).get(SongViewModel.class);
+        startProgressUpdates();
 
-        SongService.obtenerCanciones(this, token.getBody(), new SongService.VolleyCallback() {
+        // Cargar fragment inicial si es la primera vez
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new HomeFragment())
+                    .commit();
+        }
+    }
+
+    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
+            item -> {
+                Fragment selectedFragment = null;
+                int id = item.getItemId();
+                if(id == R.id.nav_home){
+                    selectedFragment = new HomeFragment();
+                } else if (id == R.id.nav_search) {
+                    selectedFragment = new SearchFragment();
+                } else if (id == R.id.nav_play) {
+                    if (mediaPlayer.isPlaying()) {
+                        selectedFragment = new PlayFragment();
+                    } else {
+                        Toast.makeText(this, "No hay ninguna canción reproduciéndose", Toast.LENGTH_SHORT).show();
+                        return false;
+                    }
+                } else if (id == R.id.nav_playlists) {
+                    selectedFragment = new PlaylistFragment();
+                    return true;
+                }
+
+
+                if (selectedFragment != null) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, selectedFragment)
+                            .commit();
+                }
+
+                return true;
+            };
+
+    private void startProgressUpdates() {
+        progressHandler.postDelayed(new Runnable() {
             @Override
-            public void onSuccess(ArrayList<Song> lista) {
-                Log.d("MainActivity", "Canciones recibidas: " + lista.size());
-                adapter = new CancionAdapter(MainActivity.this, lista);
-                recyclerView.setAdapter(adapter);
+            public void run() {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    int currentPosition = mediaPlayer.getCurrentPosition();
+                    songViewModel.setCurrentPosition(currentPosition);
+                }
+                progressHandler.postDelayed(this, 200); // Actualizar cada 200ms
             }
-
-            @Override
-            public void onError(String mensaje) {
-                Toast.makeText(MainActivity.this, "Error: " + mensaje, Toast.LENGTH_LONG).show();
-                Log.d("ERROR VOLLEY", mensaje);
-            }
-        });
+        }, 200);
     }
 
-    @Override
-    public void onPlayButtonClick(int position, Song song) {
-        if (adapter == null) return;
-
-        // Si la misma canción ya se está reproduciendo, pausar
-        if (adapter.getCurrentlyPlayingPosition() == position && mediaPlayer.isPlaying()) {
-            pauseSong();
-            adapter.setCurrentlyPlayingPosition(-1);
-        } else {
-            // Si hay otra canción reproduciéndose, detenerla primero
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-                mediaPlayer.reset();
-            }
-
-            // Reproducir la nueva canción
-            playSong(song.getAudio());
-            adapter.setCurrentlyPlayingPosition(position);
-        }
+    public void pauseProgressUpdates() {
+        progressHandler.removeCallbacksAndMessages(null);
     }
 
-    private void playSong(String audioUrl) {
-        try {
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(audioUrl);
-            mediaPlayer.prepareAsync();
-
-            mediaPlayer.setOnPreparedListener(mp -> mp.start());
-
-            mediaPlayer.setOnCompletionListener(mp -> {
-                adapter.setCurrentlyPlayingPosition(-1);
-            });
-
-            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                Toast.makeText(this, "Error al reproducir la canción", Toast.LENGTH_SHORT).show();
-                return false;
-            });
-        } catch (IOException e) {
-            Toast.makeText(this, "Error al cargar la canción", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void pauseSong() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-        }
+    public void resumeProgressUpdates() {
+        startProgressUpdates();
     }
 
     @Override
@@ -108,12 +98,14 @@ public class MainActivity extends AppCompatActivity implements CancionAdapter.On
         super.onPause();
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
+
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        progressHandler.removeCallbacksAndMessages(null);
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;

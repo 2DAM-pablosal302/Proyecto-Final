@@ -27,6 +27,9 @@ public class CancionAdapter extends RecyclerView.Adapter<CancionAdapter.ViewHold
         void onPlayButtonClick(int position, Song song);
     }
 
+    public void setPlayButtonClickListener(OnPlayButtonClickListener listener) {
+        this.playButtonClickListener = listener;
+    }
     public CancionAdapter(Context context, List<Song> canciones) {
         this.context = context;
         this.canciones = canciones;
@@ -41,6 +44,10 @@ public class CancionAdapter extends RecyclerView.Adapter<CancionAdapter.ViewHold
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(context).inflate(R.layout.item_song, parent, false);
         return new ViewHolder(v);
+    }
+
+    public List<Song> getCanciones() {
+        return canciones;
     }
 
     @Override
