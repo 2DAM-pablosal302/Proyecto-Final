@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Song;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class SongController extends Controller
 {
@@ -12,7 +14,64 @@ class SongController extends Controller
      */
     public function index()
     {
-        return Song::with(['genre', 'likedByUsers'])->get();
+        $songs = Song::with(['genre', 'likedByUsers'])->get();
+
+        // Transformamos las URLs para que sean completas
+        return $songs->map(function ($song) {
+            return [
+                'id' => $song->id,
+                'title' => $song->title,
+                'artist' => $song->artist,
+                'album' => $song->album,
+                'id_genre' => $song->id_genre,
+                'cover_url' => $song->cover_url ? asset("storage/{$song->cover_url}") : null,
+                'audio_url' => $song->audio_url ? asset("storage/{$song->audio_url}") : null,
+                'genre' => $song->genre,
+                'liked_by_users' => $song->likedByUsers
+            ];
+        });
+    }
+
+    public function search(Request $request)
+    {
+        //dd($request->query());
+        $query = $request->query('q');
+
+        if (empty($query)) {
+            return response()->json([
+                'message' => 'Debe proporcionar un término de búsqueda'
+            ], 400);
+        }
+
+        $results = Song::with(['genre', 'likedByUsers'])
+            ->where(function ($queryBuilder) use ($query) {
+                $queryBuilder->where('title', 'like', "%{$query}%")
+                    ->orWhere('artist', 'like', "%{$query}%")
+                    ->orWhere('album', 'like', "%{$query}%");
+            })
+            ->get()
+            ->map(function ($song) {
+                return [
+                    'id' => $song->id,
+                    'title' => $song->title,
+                    'artist' => $song->artist,
+                    'album' => $song->album,
+                    'id_genre' => $song->id_genre,
+                    'cover_url' => $song->cover_url ? asset("storage/{$song->cover_url}") : null,
+                    'audio_url' => $song->audio_url ? asset("storage/{$song->audio_url}") : null,
+                    'genre' => $song->genre,
+                    'liked_by_users' => $song->likedByUsers
+                ];
+            });
+
+        // $debug = Song::where('title', 'like', '%Pretty Devil%')->get();
+        // if (empty($debug)) {
+        //     dd($results);
+        // } else {
+        //     dd($debug);
+        // }
+
+        return response()->json($results);
     }
 
     /**
@@ -25,11 +84,26 @@ class SongController extends Controller
             'artist' => 'required|string|max:255',
             'album' => 'required|string|max:255',
             'id_genre' => 'required|exists:genres,id',
-            'cover_url' => 'required|url',
-            'audio_url' => 'required|url'
+            'cover' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'audio' => 'required|file|mimetypes:audio/mpeg,audio/wav,audio/mp3|max:51200'
         ]);
 
-        return Song::create($validated);
+        // Procesar la imagen de portada
+        $coverPath = $this->storeCover($request->file('cover'));
+
+        // Procesar el archivo de audio
+        $audioPath = $this->storeAudio($request->file('audio'));
+
+        $songData = [
+            'title' => $validated['title'],
+            'artist' => $validated['artist'],
+            'album' => $validated['album'],
+            'id_genre' => $validated['id_genre'],
+            'cover_url' => $coverPath,
+            'audio_url' => $audioPath
+        ];
+
+        return Song::create($songData);
     }
 
     /**
@@ -37,7 +111,20 @@ class SongController extends Controller
      */
     public function show(Song $song)
     {
-        return $song->load(['genre', 'playlists', 'likedByUsers']);
+        $song->load(['genre', 'playlists', 'likedByUsers']);
+
+        return [
+            'id' => $song->id,
+            'title' => $song->title,
+            'artist' => $song->artist,
+            'album' => $song->album,
+            'id_genre' => $song->id_genre,
+            'cover_url' => $song->cover_url ? asset("storage/{$song->cover_url}") : null,
+            'audio_url' => $song->audio_url ? asset("storage/{$song->audio_url}") : null,
+            'genre' => $song->genre,
+            'playlists' => $song->playlists,
+            'liked_by_users' => $song->likedByUsers
+        ];
     }
 
     /**
@@ -50,9 +137,27 @@ class SongController extends Controller
             'artist' => 'sometimes|string|max:255',
             'album' => 'sometimes|string|max:255',
             'id_genre' => 'sometimes|exists:genres,id',
-            'cover_url' => 'sometimes|url',
-            'audio_url' => 'sometimes|url'
+            'cover' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
+            'audio' => 'sometimes|file|mimetypes:audio/mpeg,audio/wav,audio/mp3|max:51200'
         ]);
+
+        // Actualizar cover si se proporciona
+        if ($request->hasFile('cover')) {
+            // Eliminar el cover anterior si existe
+            if ($song->cover_url && Storage::exists($song->cover_url)) {
+                Storage::delete($song->cover_url);
+            }
+            $validated['cover_url'] = $this->storeCover($request->file('cover'));
+        }
+
+        // Actualizar audio si se proporciona
+        if ($request->hasFile('audio')) {
+            // Eliminar el audio anterior si existe
+            if ($song->audio_url && Storage::exists($song->audio_url)) {
+                Storage::delete($song->audio_url);
+            }
+            $validated['audio_url'] = $this->storeAudio($request->file('audio'));
+        }
 
         $song->update($validated);
 
@@ -64,6 +169,15 @@ class SongController extends Controller
      */
     public function destroy(Song $song)
     {
+        // Eliminar archivos asociados
+        if ($song->cover_url && Storage::exists($song->cover_url)) {
+            Storage::delete($song->cover_url);
+        }
+
+        if ($song->audio_url && Storage::exists($song->audio_url)) {
+            Storage::delete($song->audio_url);
+        }
+
         $song->delete();
         return response()->noContent();
     }
@@ -84,5 +198,38 @@ class SongController extends Controller
     {
         $request->user()->likes()->detach($song);
         return response()->json(['message' => 'Song unliked']);
+    }
+
+    /**
+     * Almacena la imagen de portada y devuelve la ruta relativa
+     */
+    private function storeCover($file)
+    {
+        // Generar nombre único para el archivo
+        $filename = 'cover_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+        // Redimensionar y guardar la imagen
+        $image = Image::make($file)->resize(500, 500, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        })->encode();
+
+        Storage::disk('public')->put("covers/{$filename}", $image);
+
+        return "covers/{$filename}";
+    }
+
+    /**
+     * Almacena el archivo de audio y devuelve la ruta relativa
+     */
+    private function storeAudio($file)
+    {
+        // Generar nombre único para el archivo
+        $filename = 'audio_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+        // Guardar el archivo
+        $path = $file->storeAs('audio', $filename, 'public');
+
+        return $path;
     }
 }
