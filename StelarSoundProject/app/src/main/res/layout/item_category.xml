@@ -27,60 +27,33 @@
             android:id="@+id/searchEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:hint="Buscar"
             android:textColor="@android:color/white"
-            android:textColorHint="@color/gray_100"
-            app:boxStrokeColor="@color/verde_primario"
+            android:textColorHint="@android:color/darker_gray"
             android:imeOptions="actionSearch"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Progress Bar -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
+    <!-- Categories Grid (Visible by default) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/categoriesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:visibility="visible"
         app:layout_constraintTop_toBottomOf="@id/searchInputLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/item_category"/>
 
-    <!-- Search Results -->
+    <!-- Search Results (Hidden by default) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchResultsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/searchInputLayout"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/item_song_result"/>
-
-    <!-- Empty State -->
-    <TextView
-        android:id="@+id/emptyStateView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No se encontraron resultados"
-        android:textColor="@android:color/white"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/searchInputLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <!-- Error State -->
-    <TextView
-        android:id="@+id/errorStateView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Error al buscar"
-        android:textColor="@android:color/white"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/searchInputLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
