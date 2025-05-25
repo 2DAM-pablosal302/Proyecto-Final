@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class SongService {
 
-    private static final String URL_API = "http://192.168.1.20/api/songs";
+    private static final String URL_API = "http://172.22.254.149/api/songs";
 
     public interface VolleyCallback {
         void onSuccess(ArrayList<Song> lista);
@@ -30,7 +30,7 @@ public class SongService {
     }
 
     public static void obtenerCanciones(Context context,  String token, VolleyCallback callback) {
-        String url = "http://192.168.1.20:8000/api/songs";
+        String url = "http://172.22.254.149:8000/api/songs";
 
 
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -73,7 +73,7 @@ public class SongService {
     }
 
     public static void searchSongs(Context context, String token, String query, VolleyCallback callback) throws UnsupportedEncodingException {
-        String url = "http://192.168.1.20:8000/api/songs/search?q=" + URLEncoder.encode(query, "UTF-8");
+        String url = "http://172.22.254.149:8000/songs/search?q=" + URLEncoder.encode(query, "UTF-8");
 
         RequestQueue queue = Volley.newRequestQueue(context);
 
@@ -106,7 +106,7 @@ public class SongService {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Accept", "application/json");
-                headers.put("Authorization", "Bearer " + token);
+                //headers.put("Authorization", "Bearer " + token);
                 return headers;
             }
         };
