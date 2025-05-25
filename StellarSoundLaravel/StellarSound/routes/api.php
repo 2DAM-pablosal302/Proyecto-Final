@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('songs', SongController::class);
     Route::post('songs/{song}/like', [SongController::class, 'like'])->middleware('auth:sanctum');
     Route::post('songs/{song}/unlike', [SongController::class, 'unlike'])->middleware('auth:sanctum');
+    Route::get('songs/search', [SongController::class, 'search'])->middleware('auth:sanctum');
 
     Route::apiResource('playlists', PlaylistController::class)->middleware('auth:sanctum');
     Route::post('playlists/{playlist}/add-song', [PlaylistController::class, 'addSong'])->middleware('auth:sanctum');

@@ -56,6 +56,20 @@ return [
             'throw' => false,
         ],
 
+        'covers' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/covers'),
+            'url' => env('APP_URL').'/storage/covers',
+            'visibiity' => 'public',
+        ],
+
+        'audio' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/audio'),
+            'url' => env('APP_URL').'/storage/audio',
+            'visibiity' => 'public',
+        ],
+
     ],
 
     /*

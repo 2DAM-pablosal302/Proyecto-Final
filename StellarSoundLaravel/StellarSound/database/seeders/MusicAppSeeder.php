@@ -68,20 +68,20 @@ class MusicAppSeeder extends Seeder
         $songs = [
             // Pop
             [
-                'title' => 'Blinding Lights',
-                'artist' => 'The Weeknd',
-                'album' => 'After Hours',
+                'title' => 'Pretty Devil',
+                'artist' => 'Alessandra',
+                'album' => 'Best Year Of My Life',
                 'id_genre' => 1,
-                'cover_url' => 'https://example.com/covers/after-hours.jpg',
-                'audio_url' => 'https://example.com/audio/blinding-lights.mp3'
+                'cover_url' => 'covers/pretty_devil.jpg',
+                'audio_url' => 'audio/pretty_devil.mp3'
             ],
             [
-                'title' => 'Levitating',
-                'artist' => 'Dua Lipa',
-                'album' => 'Future Nostalgia',
+                'title' => 'Exes',
+                'artist' => 'Tate McRae',
+                'album' => 'THINK LATER',
                 'id_genre' => 1,
-                'cover_url' => 'https://example.com/covers/future-nostalgia.jpg',
-                'audio_url' => 'https://example.com/audio/levitating.mp3'
+                'cover_url' => 'covers/exes.jpg',
+                'audio_url' => 'audio/exes.mp3'
             ],
             
             // Rock
