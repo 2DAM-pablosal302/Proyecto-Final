@@ -73,7 +73,7 @@ public class SongService {
     }
 
     public static void searchSongs(Context context, String token, String query, VolleyCallback callback) throws UnsupportedEncodingException {
-        String url = "http://172.22.254.149:8000/songs/search?q=" + URLEncoder.encode(query, "UTF-8");
+        String url = "http://172.22.254.149:8000/api/songs/search?q=" + URLEncoder.encode(query, "UTF-8");
 
         RequestQueue queue = Volley.newRequestQueue(context);
 
@@ -106,7 +106,7 @@ public class SongService {
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Accept", "application/json");
-                //headers.put("Authorization", "Bearer " + token);
+                headers.put("Authorization", "Bearer " + token);
                 return headers;
             }
         };
