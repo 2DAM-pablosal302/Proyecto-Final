@@ -35,10 +35,7 @@ class SongController extends Controller
 
     public function search(Request $request)
 {
-    $user = auth()->user();
-    if (!$user) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
+    
 
     $search = $request->query('q');
     if (empty($search)) {
@@ -53,7 +50,19 @@ class SongController extends Controller
         })
         ->get();
 
-    return response()->json($songs);
+    return $songs->map(function ($song) {
+            return [
+                'id' => $song->id,
+                'title' => $song->title,
+                'artist' => $song->artist,
+                'album' => $song->album,
+                'id_genre' => $song->id_genre,
+                'cover_url' => $song->cover_url ? asset("storage/{$song->cover_url}") : null,
+                'audio_url' => $song->audio_url ? asset("storage/{$song->audio_url}") : null,
+                'genre' => $song->genre,
+                'liked_by_users' => $song->likedByUsers
+            ];
+        });
 }
 
 

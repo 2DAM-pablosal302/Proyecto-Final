@@ -6,12 +6,29 @@ import androidx.lifecycle.ViewModel;
 
 import com.iesmm.stelarsound.Models.Song;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SongViewModel extends ViewModel {
     private final MutableLiveData<Song> currentSong = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlaying = new MutableLiveData<>(false);
     private final MutableLiveData<Integer> currentPosition = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> songDuration = new MutableLiveData<>(0);
+    private MutableLiveData<List<Song>> queue = new MutableLiveData<>(new ArrayList<>());
 
+    public LiveData<List<Song>> getQueue() {
+        return queue;
+    }
+
+    public void setQueue(List<Song> newQueue) {
+        queue.setValue(newQueue);
+    }
+
+    public void addToQueue(Song song) {
+        List<Song> updatedQueue = new ArrayList<>(queue.getValue());
+        updatedQueue.add(song);
+        queue.setValue(updatedQueue);
+    }
     public void setCurrentSong(Song song) {
         currentSong.setValue(song);
     }

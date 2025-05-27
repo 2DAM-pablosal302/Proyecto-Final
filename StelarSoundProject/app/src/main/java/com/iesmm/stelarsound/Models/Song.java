@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 public class Song implements Parcelable {
+    private int id;
     private String title;
     private String artist;
     private String album;
@@ -16,6 +17,7 @@ public class Song implements Parcelable {
     }
 
     protected Song(Parcel in) {
+        id = in.readInt();
         title = in.readString();
         artist = in.readString();
         album = in.readString();
@@ -34,6 +36,14 @@ public class Song implements Parcelable {
             return new Song[size];
         }
     };
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;

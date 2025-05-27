@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::resource('users', AdminUserController::class);
-    Route::get('songs/search', [SongController::class, 'search']);
+
     Route::resource('playlists', PlaylistController::class);
     Route::resource('songs', SongController::class);
     Route::resource('genres', GenreController::class);

@@ -3,6 +3,7 @@ package com.iesmm.stelarsound;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         }
     }
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             item -> {

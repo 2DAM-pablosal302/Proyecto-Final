@@ -65,7 +65,7 @@ class PlaylistController extends Controller
     public function show($id)
     {
         $playlist = Playlist::with(['songs' => function($query) {
-            $query->select('songs.id', 'title', 'artist', 'album', 'cover_url');
+            $query->select('songs.id', 'title', 'artist', 'album', 'cover_url', 'audio_url');
         }])->findOrFail($id);
 
         // Verificar que el usuario es el dueño de la playlist
@@ -92,7 +92,6 @@ class PlaylistController extends Controller
                 'title' => $song->title,
                 'artist' => $song->artist,
                 'album' => $song->album,
-                'duration' => $song->duration,
                 'cover_url' => $song->cover_url ? asset("storage/{$song->cover_url}") : null,
                 'audio_url' => $song->audio_url ? asset("storage/{$song->audio_url}") : null
             ];
@@ -194,23 +193,26 @@ class PlaylistController extends Controller
      */
 
     public function search(Request $request)
-    {
-        $request->validate([
-            'query' => 'required|string|min:2'
-        ]);
+{
+    $request->validate([
+        'query' => 'required|string|min:2'
+    ]);
 
-        $playlists = $request->user()->playlists()
-            ->where('name', 'like', '%'.$request->query.'%')
-            ->withCount('songs')
-            ->with(['user:id,name'])
-            ->get();
+    $query = $request->input('query');
 
-        return response()->json([
-            'playlists' => $playlists->map(function($playlist) {
-                return $this->formatPlaylistResponse($playlist);
-            })
-        ]);
-    }
+    $playlists = $request->user()->playlists()
+        ->where('name', 'like', '%' . $query . '%')
+        ->withCount('songs')
+        ->with(['user:id,name'])
+        ->get();
+
+    return response()->json([
+        'playlists' => $playlists->map(function($playlist) {
+            return $this->formatPlaylistResponse($playlist);
+        })
+    ]);
+}
+
 
     /**
      * Store cover
@@ -226,14 +228,15 @@ class PlaylistController extends Controller
      * Reboot playlist output
      */
     private function formatPlaylistResponse($playlist)
-    {
-        return [
-            'id' => $playlist->id,
-            'name' => $playlist->name,
-            'creator' => $playlist->user->name,
-            'song_count' => $playlist->songs_count ?? $playlist->songs()->count(),
-            'cover_url' => $playlist->cover_url ? Storage::url($playlist->cover_url) : null,
-            'created_at' => $playlist->created_at->diffForHumans()
-        ];
-    }
+{
+    return [
+        'id' => $playlist->id,
+        'name' => $playlist->name,
+        'creator' => $playlist->user?->name,
+        'song_count' => $playlist->songs_count ?? ($playlist->songs()?->count() ?? 0),
+        'cover_url' => $playlist->cover_url ? Storage::url($playlist->cover_url) : null,
+        'created_at' => optional($playlist->created_at)->diffForHumans(),
+    ];
+}
+
 }

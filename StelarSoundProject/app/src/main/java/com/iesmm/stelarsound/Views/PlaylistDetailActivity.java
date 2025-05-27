@@ -3,6 +3,7 @@ package com.iesmm.stelarsound.Views;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ public class PlaylistDetailActivity extends AppCompatActivity
     // Datos de la playlist
     private String authToken;
     private int playlistId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

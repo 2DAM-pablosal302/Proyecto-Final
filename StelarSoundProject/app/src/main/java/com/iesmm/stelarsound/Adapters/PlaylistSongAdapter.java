@@ -4,11 +4,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.iesmm.stelarsound.Models.Song;
 import com.iesmm.stelarsound.R;
 
@@ -54,6 +56,7 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
     }
 
     static class SongViewHolder extends RecyclerView.ViewHolder {
+        private final ImageView songCover;
         private final TextView songNumber;
         private final TextView songTitle;
         private final TextView songArtist;
@@ -61,7 +64,9 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
+
             songNumber = itemView.findViewById(R.id.songNumber);
+            songCover = itemView.findViewById(R.id.songCoverImageViewDetail);
             songTitle = itemView.findViewById(R.id.songTitle);
             songArtist = itemView.findViewById(R.id.songArtist);
             optionsButton = itemView.findViewById(R.id.optionsButton);
@@ -69,6 +74,11 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
 
         public void bind(Song song, int position, OnSongClickListener listener) {
             songNumber.setText(String.valueOf(position));
+            // Cargar imagen de la canción
+            Glide.with(itemView.getContext())
+                    .load(song.getCover())
+                    .placeholder(R.drawable.ic_music_note)
+                    .into(songCover);
             songTitle.setText(song.getTitle());
             songArtist.setText(song.getArtist());
 

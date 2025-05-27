@@ -2,11 +2,15 @@ package com.iesmm.stelarsound.Views;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,12 +28,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.iesmm.stelarsound.Adapters.CancionAdapter;
 import com.iesmm.stelarsound.Adapters.SongResultsAdapter;
+import com.iesmm.stelarsound.MainActivity;
 import com.iesmm.stelarsound.Models.Song;
 import com.iesmm.stelarsound.Models.Token;
 import com.iesmm.stelarsound.R;
 import com.iesmm.stelarsound.Services.SongService;
+import com.iesmm.stelarsound.ViewModels.SongViewModel;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
@@ -42,16 +50,15 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
     private TextView emptyStateView, errorStateView;
     private SongResultsAdapter songResultsAdapter;
     private Token token;
+    private SongViewModel songViewModel;
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-
-        // Obtener token del intent de la actividad
         Bundle bundle = getActivity().getIntent().getExtras();
         if (bundle != null) {
             token = bundle.getParcelable("token");
-        }else{
+        } else {
             Log.e("Token ERROR", "Token no recibido");
         }
     }
@@ -60,13 +67,12 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
-
         searchResultsRecyclerView = view.findViewById(R.id.searchResultsRecyclerView);
         searchEditText = view.findViewById(R.id.searchEditText);
         progressBar = view.findViewById(R.id.progressBar);
         emptyStateView = view.findViewById(R.id.emptyStateView);
         errorStateView = view.findViewById(R.id.errorStateView);
-
+        songViewModel = new ViewModelProvider(requireActivity()).get(SongViewModel.class);
 
         showInitialState();
         return view;
@@ -76,12 +82,10 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Configurar RecyclerView
         songResultsAdapter = new SongResultsAdapter(new ArrayList<>(), this);
         searchResultsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         searchResultsRecyclerView.setAdapter(songResultsAdapter);
 
-        // Configurar búsqueda
         setupSearchFunctionality();
     }
 
@@ -94,9 +98,8 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
             return false;
         });
 
-
         searchEditText.addTextChangedListener(new TextWatcher() {
-            private Handler handler = new Handler();
+            private final Handler handler = new Handler();
             private Runnable runnable;
 
             @Override
@@ -117,12 +120,10 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
 
     private void performSearch() {
         String query = searchEditText.getText().toString().trim();
-
         if (query.isEmpty()) {
             showInitialState();
             return;
         }
-
         showLoadingState();
         executeSearchRequest(query);
     }
@@ -199,13 +200,39 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
 
     @Override
     public void onSongClick(Song song) {
-        // Navegar a detalles de la canción
-        Toast.makeText(getContext(), "Seleccionada: " + song.getTitle(), Toast.LENGTH_SHORT).show();
+        navigateToPlayFragment(song);
     }
 
     @Override
     public void onPlayClick(Song song) {
-        // Reproducir canción
-        Toast.makeText(getContext(), "Reproduciendo: " + song.getTitle(), Toast.LENGTH_SHORT).show();
+        navigateToPlayFragment(song);
     }
+
+    private void navigateToPlayFragment(Song song) {
+        songViewModel.setCurrentSong(song);
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            try {
+                activity.mediaPlayer.reset();
+                activity.mediaPlayer.setDataSource(song.getAudio()); // <-- IMPORTANTE: usa getAudio() o el campo correcto
+                activity.mediaPlayer.prepare(); // o prepareAsync si quieres hacerlo en background
+                activity.mediaPlayer.start();
+
+                songViewModel.setIsPlaying(true);
+                songViewModel.setSongDuration(activity.mediaPlayer.getDuration());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(getContext(), "Error al reproducir la canción", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, new PlayFragment());
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+    }
+
 }
