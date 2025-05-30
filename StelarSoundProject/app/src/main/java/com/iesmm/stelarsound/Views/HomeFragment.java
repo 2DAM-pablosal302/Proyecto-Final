@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HomeFragment extends Fragment {
-    private RecyclerView recyclerView;
-    private CancionAdapter adapter;
+    private RecyclerView recyclerView, recentRecyclerView;
+    private CancionAdapter adapter, recentAdapter;
     private Map<String, String> loginData = new HashMap<>();
     private SongViewModel songViewModel;
 
@@ -37,6 +37,9 @@ public class HomeFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.popularRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        recentRecyclerView = view.findViewById(R.id.recentRecyclerView);
+        recentRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+
 
         // Obtener token del intent de la actividad
         Bundle bundle = getActivity().getIntent().getExtras();
@@ -46,6 +49,19 @@ public class HomeFragment extends Fragment {
         }
 
         songViewModel = new ViewModelProvider(requireActivity()).get(SongViewModel.class);
+        recentAdapter = new CancionAdapter(getContext(), new ArrayList<>());
+        recentAdapter.setPlayButtonClickListener((position, song) -> {
+            manejarReproduccion(position, song);
+        });
+        recentRecyclerView.setAdapter(recentAdapter);
+
+        songViewModel.getRecentlyPlayed().observe(getViewLifecycleOwner(), recentSongs -> {
+            Log.d("HomeFragment", "Historial actualizado: " + recentSongs.size());
+            if (recentSongs != null) {
+                recentAdapter.setCanciones(recentSongs); // Actualiza el adapter con los nuevos datos
+            }
+        });
+
 
         return view;
     }
@@ -102,6 +118,7 @@ public class HomeFragment extends Fragment {
             adapter.setCurrentlyPlayingPosition(position);
             songViewModel.setCurrentSong(song);
             songViewModel.setIsPlaying(true);
+            songViewModel.addToRecentlyPlayed(song);
         }
     }
 

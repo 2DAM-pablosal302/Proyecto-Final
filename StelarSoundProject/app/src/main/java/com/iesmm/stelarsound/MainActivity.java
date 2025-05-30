@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new HomeFragment())
                     .commit();
+
+            
         }
     }
 
@@ -112,4 +114,9 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer = null;
         }
     }
+    public BottomNavigationView getBottomNav() {
+        return bottomNav;
+    }
+
+
 }

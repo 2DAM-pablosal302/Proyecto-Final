@@ -21,6 +21,9 @@ import com.iesmm.stelarsound.Models.Song;
 import com.iesmm.stelarsound.R;
 import com.iesmm.stelarsound.ViewModels.SongViewModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PlayFragment extends Fragment {
     private SongViewModel songViewModel;
     private ImageView albumCover, playPauseButton;
@@ -40,6 +43,7 @@ public class PlayFragment extends Fragment {
         progressBar = view.findViewById(R.id.song_progress);
         currentTime = view.findViewById(R.id.current_time);
         totalTime = view.findViewById(R.id.total_time);
+
 
         return view;
     }
@@ -140,6 +144,13 @@ public class PlayFragment extends Fragment {
                 songViewModel.setIsPlaying(!isPlaying);
             }
         });
+
+        ImageView btnPrevious = view.findViewById(R.id.btn_previous);
+        ImageView btnNext = view.findViewById(R.id.btn_next);
+
+        btnPrevious.setOnClickListener(v -> playPreviousSong());
+        btnNext.setOnClickListener(v -> playNextSong());
+
     }
 
     private void updateSongInfo(Song song) {
@@ -170,4 +181,75 @@ public class PlayFragment extends Fragment {
         int minutes = (milliseconds / (1000 * 60)) % 60;
         return String.format("%d:%02d", minutes, seconds);
     }
+
+    private void playNextSong() {
+        Song current = songViewModel.getCurrentSong().getValue();
+        List<Song> queue = new ArrayList<>(songViewModel.getQueue().getValue());
+
+        if (queue == null || queue.isEmpty()) {
+            return;
+        }
+
+        Song nextSong = queue.remove(0);
+        playSong(nextSong, queue, true); // SÍ añadir al historial
+
+    }
+
+    private void playPreviousSong() {
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
+
+        List<Song> history = new ArrayList<>(songViewModel.getRecentlyPlayed().getValue());
+        Song current = songViewModel.getCurrentSong().getValue();
+
+        if (history.size() < 2) {
+            // Si no hay anterior o solo está la actual, reiniciar
+            if (activity.mediaPlayer.getCurrentPosition() > 3000) {
+                activity.mediaPlayer.seekTo(0);
+            }
+            return;
+        }
+
+        // Eliminar la canción actual y obtener la anterior
+        history.remove(history.size() - 1); // Eliminar actual
+        Song previous = history.remove(history.size() - 1); // Obtener anterior real
+
+        songViewModel.setCurrentSong(previous); // Actualizar el ViewModel
+        playSong(previous, songViewModel.getQueue().getValue(), false); // NO añadir al historial
+        // Reproducir
+    }
+
+
+
+    private void playSong(Song song, List<Song> updatedQueue, boolean addToHistory) {
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
+
+        try {
+            activity.mediaPlayer.reset();
+            activity.mediaPlayer.setDataSource(song.getAudio());
+
+            activity.mediaPlayer.setOnPreparedListener(mp -> {
+                mp.start();
+                songViewModel.setIsPlaying(true);
+                songViewModel.setSongDuration(mp.getDuration());
+            });
+
+            activity.mediaPlayer.prepareAsync();
+
+            songViewModel.setCurrentSong(song);
+            songViewModel.setQueue(updatedQueue);
+            if (addToHistory) {
+                songViewModel.addToRecentlyPlayed(song);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
 }

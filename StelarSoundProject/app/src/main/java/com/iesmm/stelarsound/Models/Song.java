@@ -92,10 +92,12 @@ public class Song implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(title);
         dest.writeString(artist);
         dest.writeString(album);
         dest.writeString(cover);
         dest.writeString(audio);
     }
+
 }

@@ -133,14 +133,13 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
 
     @Override
     public void onPlaylistClick(Playlist playlist) {
-        // Navegar al detalle de la playlist
-        Toast.makeText(getContext(), "Seleccionada: " + playlist.getName(), Toast.LENGTH_SHORT).show();
-        // Aquí deberías implementar la navegación al fragment/activity de detalle
-        Intent intent = new Intent(getActivity(), PlaylistDetailActivity.class);
-        intent.putExtra("playlist_id", playlist.getId());
-        intent.putExtra("auth_token", token.getBody());
-        startActivity(intent);
+        PlaylistDetailFragment detailFragment = PlaylistDetailFragment.newInstance(playlist.getId(), token.getBody());
+        requireActivity().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, detailFragment)
+                .addToBackStack(null)
+                .commit();
     }
+
 
     @Override
     public void onPlaylistOptionsClick(Playlist playlist, View anchorView) {
@@ -174,6 +173,7 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
                                 .replace(R.id.fragment_container, new PlayFragment())
                                 .addToBackStack(null)
                                 .commit();
+                        activity.getBottomNav().setSelectedItemId(R.id.nav_play);
 
                     } catch (Exception e) {
                         e.printStackTrace();

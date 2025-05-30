@@ -108,4 +108,10 @@ public class CancionAdapter extends RecyclerView.Adapter<CancionAdapter.ViewHold
             botonPlay = itemView.findViewById(R.id.play_button);
         }
     }
+
+    public void setCanciones(List<Song> nuevasCanciones) {
+        this.canciones = nuevasCanciones;
+        notifyDataSetChanged();
+    }
+
 }

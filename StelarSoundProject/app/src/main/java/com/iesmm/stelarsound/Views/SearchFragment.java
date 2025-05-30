@@ -232,6 +232,8 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
             transaction.replace(R.id.fragment_container, new PlayFragment());
             transaction.addToBackStack(null);
             transaction.commit();
+            activity.getBottomNav().setSelectedItemId(R.id.nav_play);
+
         }
     }
 
