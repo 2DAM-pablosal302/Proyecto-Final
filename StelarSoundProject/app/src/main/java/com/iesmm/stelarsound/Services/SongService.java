@@ -42,6 +42,7 @@ public class SongService {
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject obj = response.getJSONObject(i);
                             Song song = new Song();
+                            song.setId(obj.getInt("id"));
                             song.setTitle(obj.getString("title"));
                             song.setArtist(obj.getString("artist"));
                             song.setAlbum(obj.getString("album"));

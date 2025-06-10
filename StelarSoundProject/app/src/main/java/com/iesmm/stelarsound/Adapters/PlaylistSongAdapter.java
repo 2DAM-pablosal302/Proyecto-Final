@@ -20,15 +20,17 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
 
     private List<Song> songs;
     private OnSongClickListener listener;
-
+    private boolean showDeleteButton;
     public interface OnSongClickListener {
         void onSongClick(int position);
         void onOptionsClick(Song song, View anchorView);
+        void onDeleteClick(int songId, int position);
     }
 
-    public PlaylistSongAdapter(List<Song> songs, OnSongClickListener listener) {
+    public PlaylistSongAdapter(List<Song> songs, OnSongClickListener listener, boolean showDeleteButton) {
         this.songs = songs;
         this.listener = listener;
+        this.showDeleteButton = showDeleteButton;
     }
 
     @NonNull
@@ -43,6 +45,17 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
     public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
         Song song = songs.get(position);
         holder.bind(song, position + 1, listener);
+
+        if (showDeleteButton) {
+            holder.btnDelete.setVisibility(View.VISIBLE);
+            holder.btnDelete.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeleteClick(song.getId(), position);
+                }
+            });
+        } else {
+            holder.btnDelete.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -61,6 +74,7 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
         private final TextView songTitle;
         private final TextView songArtist;
         private final ImageButton optionsButton;
+        public ImageButton btnDelete;
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -70,6 +84,7 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
             songTitle = itemView.findViewById(R.id.songTitle);
             songArtist = itemView.findViewById(R.id.songArtist);
             optionsButton = itemView.findViewById(R.id.optionsButton);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
 
         public void bind(Song song, int position, OnSongClickListener listener) {

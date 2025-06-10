@@ -56,13 +56,30 @@
                 android:maxLines="1"/>
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/optionsButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_play_circle"
-            app:tint="#B3B3B3" />
+            android:layout_weight="0.1"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/optionsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_play_circle"
+                app:tint="#B3B3B3" />
+
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/rounded_red_background_with_ripple"
+                android:src="@drawable/ic_delete"
+                android:layout_marginEnd="8dp"
+                android:padding="12dp"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <View

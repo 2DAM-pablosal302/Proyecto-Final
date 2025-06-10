@@ -5,12 +5,24 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Song implements Parcelable {
+    @SerializedName("id")
     private int id;
+    @SerializedName("title")
     private String title;
+
+    @SerializedName("artist")
     private String artist;
+
+    @SerializedName("album")
     private String album;
+
+    @SerializedName("cover_url")  // <-- importante
     private String cover;
+
+    @SerializedName("audio_url")  // <-- importante
     private String audio;
 
     public Song() {
@@ -100,4 +112,15 @@ public class Song implements Parcelable {
         dest.writeString(audio);
     }
 
+    @Override
+    public String toString() {
+        return "Song{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", artist='" + artist + '\'' +
+                ", album='" + album + '\'' +
+                ", cover='" + cover + '\'' +
+                ", audio='" + audio + '\'' +
+                '}';
+    }
 }

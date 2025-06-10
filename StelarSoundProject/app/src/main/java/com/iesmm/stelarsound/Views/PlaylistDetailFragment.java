@@ -1,5 +1,6 @@
 package com.iesmm.stelarsound.Views;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +44,8 @@ public class PlaylistDetailFragment extends Fragment implements PlaylistSongAdap
 
     public PlaylistDetailFragment() {}
 
+    private Button addSongBtn;
+
     public static PlaylistDetailFragment newInstance(int playlistId, String authToken) {
         PlaylistDetailFragment fragment = new PlaylistDetailFragment();
         Bundle args = new Bundle();
@@ -69,8 +73,9 @@ public class PlaylistDetailFragment extends Fragment implements PlaylistSongAdap
         playlistDetailsTextView = view.findViewById(R.id.playlistDetails);
         songsRecyclerView = view.findViewById(R.id.songsRecyclerView);
         playButton = view.findViewById(R.id.playButton);
+        addSongBtn = view.findViewById(R.id.addSongButton);
 
-        adapter = new PlaylistSongAdapter(songs, this);
+        adapter = new PlaylistSongAdapter(songs, this, true);
         songsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         songsRecyclerView.setAdapter(adapter);
 
@@ -83,6 +88,12 @@ public class PlaylistDetailFragment extends Fragment implements PlaylistSongAdap
                 Toast.makeText(getContext(), "No hay canciones en esta playlist", Toast.LENGTH_SHORT).show();
             }
         });
+
+        addSongBtn.setOnClickListener(v -> {
+            com.iesmm.stelarsound.Views.SongPickerDialogFragment dialog = com.iesmm.stelarsound.Views.SongPickerDialogFragment.newInstance(playlistId, authToken);
+            dialog.show(getParentFragmentManager(), "SongPickerDialog");
+        });
+
 
         return view;
     }
@@ -147,6 +158,40 @@ public class PlaylistDetailFragment extends Fragment implements PlaylistSongAdap
                 Log.e("PLAY_ERROR", e.getMessage());
             }
         }
+    }
+
+    public void removeSongFromPlaylist(int songId) {
+        PlaylistService.removeSongFromPlaylist(requireContext(), authToken, playlistId, songId,
+                new PlaylistService.SongListCallback() {
+                    @Override
+                    public void onSuccess(List<Song> updatedSongs) {
+                        requireActivity().runOnUiThread(() -> {
+                            songs.clear();
+                            songs.addAll(updatedSongs);
+                            adapter.notifyDataSetChanged();
+                            Toast.makeText(getContext(), "Canción eliminada", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                        });
+                    }
+                });
+    }
+
+
+    @Override
+    public void onDeleteClick(int songId, int position) {
+        // Mostrar diálogo de confirmación antes de eliminar
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Eliminar canción")
+                .setMessage("¿Estás seguro de que quieres eliminar esta canción de la playlist?")
+                .setPositiveButton("Eliminar", (dialog, which) -> removeSongFromPlaylist(songId))
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     @Override

@@ -1,7 +1,10 @@
 package com.iesmm.stelarsound.Views;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,13 +13,17 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.iesmm.stelarsound.Adapters.PlaylistAdapter;
 import com.iesmm.stelarsound.MainActivity;
 import com.iesmm.stelarsound.Models.Playlist;
@@ -37,6 +44,8 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
     private TextView emptyState, errorState;
     private PlaylistAdapter playlistAdapter;
     private Token token;
+    private FloatingActionButton addPlaylistBtn;
+
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -65,6 +74,9 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         // Adapter configurations
         playlistAdapter = new PlaylistAdapter(new ArrayList<>(), this);
         playlistsRecyclerView.setAdapter(playlistAdapter);
+
+        addPlaylistBtn = view.findViewById(R.id.addButton);
+        addPlaylistBtn.setOnClickListener(v -> showCreatePlaylistDialog());
 
         return view;
     }
@@ -192,6 +204,72 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         });
 
     }
+
+    private static final int PICK_IMAGE_REQUEST_CODE = 1001;
+    private Uri selectedCoverUri = null;
+
+    private void showCreatePlaylistDialog() {
+        // Inflamos un layout personalizado para el diálogo
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_create_playlist, null);
+
+        EditText input = dialogView.findViewById(R.id.editTextPlaylistName);
+        ImageView coverImage = dialogView.findViewById(R.id.imageViewCover);
+
+        coverImage.setOnClickListener(v -> {
+            // Abrir selector de imágenes
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, PICK_IMAGE_REQUEST_CODE);
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Nueva Playlist");
+        builder.setView(dialogView);
+
+        builder.setPositiveButton("Crear", (dialog, which) -> {
+            String name = input.getText().toString().trim();
+            if (!name.isEmpty()) {
+                // Pasamos la URI en string o null si no se seleccionó imagen
+                createPlaylist(name, selectedCoverUri != null ? selectedCoverUri.toString() : null);
+            } else {
+                Toast.makeText(getContext(), "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
+    }
+
+    // Recibimos el resultado del selector de imágenes
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            selectedCoverUri = data.getData();
+            // Actualizar la imagen en el diálogo (si está visible)
+            // Para eso necesitarías guardar referencia al ImageView o usar un campo global, o abrir un nuevo diálogo
+            // Por simplicidad puedes refrescar el dialogo o usar otro mecanismo
+        }
+    }
+
+
+    private void createPlaylist(String name, String coverUri) {
+        PlaylistService.createPlaylist(requireContext(), token.getBody(), name, coverUri, new PlaylistService.PlaylistDetailCallback() {
+            @Override
+            public void onSuccess(Playlist playlist) {
+                Toast.makeText(getContext(), "Playlist creada: " + playlist.getName(), Toast.LENGTH_SHORT).show();
+                loadPlaylists();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(getContext(), "Error al crear playlist: " + message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
 
 
 }
