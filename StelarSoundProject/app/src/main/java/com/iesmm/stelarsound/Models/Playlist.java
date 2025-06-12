@@ -28,6 +28,8 @@ public class Playlist implements Parcelable {
         this.songs = new ArrayList<>();
     }
 
+
+
     public Playlist(int id, String name,  String coverUrl, int songCount) {
         this.id = id;
         this.name = name;

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,6 +112,7 @@ public class PlaylistService {
                         for (int i = 0; i < songsArray.length(); i++) {
                             JSONObject songObj = songsArray.getJSONObject(i);
                             Song song = new Song();
+                            song.setId(songObj.getInt("id"));
                             song.setTitle(songObj.getString("title"));
                             song.setArtist(songObj.getString("artist"));
                             song.setAlbum(songObj.getString("album"));
@@ -179,45 +182,23 @@ public class PlaylistService {
     }
 
     public static void removeSongFromPlaylist(Context context, String token, int playlistId, int songId, SongListCallback callback) {
-        String url = BASE_URL + "playlists/" + playlistId + "/songs";
+        String url = BASE_URL + "playlists/" + playlistId + "/songs/" + songId;
 
-        // Crear el cuerpo JSON
-        JSONObject requestBody = new JSONObject();
-        try {
-            requestBody.put("song_id", songId);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // Usar StringRequest en lugar de JsonObjectRequest para DELETE con cuerpo
         StringRequest request = new StringRequest(
                 Request.Method.DELETE, url,
                 response -> {
-                    // Actualizar la lista de canciones después de eliminar
                     getPlaylistSongs(context, token, playlistId, callback);
                 },
                 error -> {
                     callback.onError("Error al eliminar canción: " + error.getMessage());
-                    Log.e("PlaylistService", "Remove Song Error: " + error.toString());
                 }
         ) {
-            @Override
-            public byte[] getBody() {
-                return requestBody.toString().getBytes();
-            }
-
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + token);
-                headers.put("Content-Type", "application/json");
                 headers.put("Accept", "application/json");
                 return headers;
-            }
-
-            @Override
-            public String getBodyContentType() {
-                return "application/json";
             }
         };
 
@@ -244,6 +225,7 @@ public class PlaylistService {
                             song.setAlbum(songObj.getString("album"));
                             song.setCover(songObj.optString("cover_url", null));
                             song.setAudio(songObj.optString("audio_url", null));
+                            song.setLiked(songObj.getBoolean("is_liked"));
                             songs.add(song);
                         }
 
@@ -394,6 +376,56 @@ public class PlaylistService {
 
             return byteBuffer.toByteArray();
         }
+    }
+
+    public static void deletePlaylist(Context context, String token, int playlistId, PlaylistDeleteCallback callback) {
+        String url = BASE_URL + "playlists/" + playlistId;
+
+        StringRequest request = new StringRequest(
+                Request.Method.DELETE, url,
+                response -> {
+                    Log.d("DELETE_PLAYLIST", "Respuesta: " + response);
+                    callback.onSuccess("Playlist eliminada");
+                },
+                error -> {
+                    String errorMsg = "Error al eliminar playlist";
+                    if (error.networkResponse != null) {
+                        errorMsg += " (Código: " + error.networkResponse.statusCode + ")";
+                        try {
+                            String responseBody = new String(error.networkResponse.data, StandardCharsets.UTF_8);
+                            errorMsg += " - " + responseBody;
+                        } catch (Exception e) {
+                            Log.e("DELETE_PLAYLIST", "Error al parsear respuesta", e);
+                        }
+                    }
+                    callback.onError(errorMsg);
+                    Log.e("CALL DELETE FAIL", errorMsg);
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                headers.put("Accept", "application/json");
+                return headers;
+            }
+        };
+
+        // Configura política de reintentos
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000,  // 10 segundos timeout
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
+    }
+
+    // Interface para el callback
+    public interface PlaylistDeleteCallback {
+        void onSuccess(String message);
+        void onError(String error);
     }
 
 

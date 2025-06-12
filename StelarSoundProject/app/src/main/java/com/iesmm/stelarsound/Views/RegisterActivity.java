@@ -19,13 +19,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
-import com.iesmm.stelarsound.MainActivity;
-import com.iesmm.stelarsound.Models.Token;
 import com.iesmm.stelarsound.Models.User;
 import com.iesmm.stelarsound.R;
 import com.iesmm.stelarsound.Services.ApiClient;
 import com.iesmm.stelarsound.Services.ApiService;
-import com.iesmm.stelarsound.Services.LoginResponse;
+import com.iesmm.stelarsound.Services.RegisterResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,27 +32,32 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LoginActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity {
+
+    private EditText nameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
+    private Button registerBtn;
+    private ApiService apiService;
     private CardView cardView;
     private float initialY;
     private float initialTouchY;
     private boolean isCardUp = false;
-    private EditText email ;
-    private EditText passwd ;
-    private Button loginbtn;
-    private ApiService apiService;
-    private TextView registerTxt;
+    private TextView loginTxt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
 
-        cardView = findViewById(R.id.card_view);
+        nameEditText = findViewById(R.id.name_txt);
+        emailEditText = findViewById(R.id.email_txt);
+        passwordEditText = findViewById(R.id.passwd);
+        confirmPasswordEditText = findViewById(R.id.confirm_passwd);
+        registerBtn = findViewById(R.id.register_button);
         View dragHandle = findViewById(R.id.drag_handle);
-        email= findViewById(R.id.email_txt);
-        passwd = findViewById(R.id.passwd);
-        registerTxt = findViewById(R.id.registerTxt);
+        cardView = findViewById(R.id.card_view);
+        loginTxt = findViewById(R.id.loginTxt);
+
+        apiService = ApiClient.getClient().create(ApiService.class);
 
         TextView title = findViewById(R.id.stellarTitle);
         title.post(() -> {
@@ -69,9 +72,8 @@ public class LoginActivity extends AppCompatActivity {
             title.invalidate();
         });
 
-
-        registerTxt.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+        loginTxt.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
@@ -120,55 +122,51 @@ public class LoginActivity extends AppCompatActivity {
             isCardUp = true;
         }, 800);
 
-
-        apiService = ApiClient.getClient().create(ApiService.class);
-
-        loginbtn = findViewById(R.id.login_button);
-        loginbtn.setOnClickListener(v -> validateLogin());
-
+        registerBtn.setOnClickListener(v -> validateRegister());
     }
 
-    private void validateLogin(){
-        Map<String, String> loginData = new HashMap<>();
-        loginData.put("email", email.getText().toString());
-        loginData.put("password", passwd.getText().toString());
+    private void validateRegister() {
+        String name = nameEditText.getText().toString().trim();
+        String email = emailEditText.getText().toString().trim();
+        String pass = passwordEditText.getText().toString().trim();
+        String confirm = confirmPasswordEditText.getText().toString().trim();
 
-        if (email.toString().isEmpty() || passwd.toString().isEmpty()) {
-            Toast.makeText(this, "Por favor ingresa todos los campos", Toast.LENGTH_SHORT).show();
+        if (name.isEmpty() || email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
+            Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Call<LoginResponse> call = apiService.login(loginData);
-        call.enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful()) {
-                    String token_txt = response.body().token;
-                    Token token = new Token();
-                    token.setBody(token_txt);
-                    User user = response.body().data;
-                    Log.d("TOKEN", token_txt);
-                    goToMain(user, token);
-                } else {
-                    Log.e("LOGIN_FAIL", "Credenciales incorrectas");
+        if (!pass.equals(confirm)) {
+            Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        Map<String, String> registerData = new HashMap<>();
+        registerData.put("name", name);
+        registerData.put("email", email);
+        registerData.put("password", pass);
+        registerData.put("password_confirmation", confirm);
+
+        Call<RegisterResponse> call = apiService.register(registerData);
+        call.enqueue(new Callback<RegisterResponse>() {
+            @Override
+            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(RegisterActivity.this, "Registro exitoso. Ahora puedes iniciar sesión.", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(RegisterActivity.this, "Error en el registro", Toast.LENGTH_LONG).show();
+                    Log.e("REGISTER_FAIL", "Error: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Log.e("ERROR", t.getMessage());
+            public void onFailure(Call<RegisterResponse> call, Throwable t) {
+                Toast.makeText(RegisterActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Log.e("REGISTER_ERROR", t.getMessage());
             }
         });
-    }
-
-    private void goToMain(User user, Token token){
-        Intent intent = new Intent(this, MainActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("usuario", user);
-        bundle.putParcelable("token", token);
-        intent.putExtras(bundle);
-        startActivity(intent);
     }
 
     private void animateCardUp() {
@@ -187,7 +185,5 @@ public class LoginActivity extends AppCompatActivity {
                 .start();
     }
 
+
 }
-
-
-

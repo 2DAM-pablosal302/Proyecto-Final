@@ -1,6 +1,8 @@
 package com.iesmm.stelarsound.Views;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +20,9 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.iesmm.stelarsound.MainActivity;
 import com.iesmm.stelarsound.Models.Song;
+import com.iesmm.stelarsound.Models.Token;
 import com.iesmm.stelarsound.R;
+import com.iesmm.stelarsound.Services.SongService;
 import com.iesmm.stelarsound.ViewModels.SongViewModel;
 
 import java.util.ArrayList;
@@ -29,6 +33,9 @@ public class PlayFragment extends Fragment {
     private ImageView albumCover, playPauseButton;
     private TextView songTitle, artistName, currentTime, totalTime;
     private SeekBar progressBar;
+    private ImageView likeButton;
+    private boolean isLiked = false;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,6 +50,7 @@ public class PlayFragment extends Fragment {
         progressBar = view.findViewById(R.id.song_progress);
         currentTime = view.findViewById(R.id.current_time);
         totalTime = view.findViewById(R.id.total_time);
+        likeButton = view.findViewById(R.id.likeButton);
 
 
         return view;
@@ -63,6 +71,7 @@ public class PlayFragment extends Fragment {
                 progressBar.setProgress(position);
                 currentTime.setText(formatTime(position));
             }
+
         });
 
         // Configurar el SeekBar
@@ -111,6 +120,8 @@ public class PlayFragment extends Fragment {
         songViewModel.getCurrentSong().observe(getViewLifecycleOwner(), song -> {
             if (song != null) {
                 updateSongInfo(song);
+                isLiked = song.isLiked();
+                updateSongInfo(song);
             }
         });
 
@@ -151,6 +162,8 @@ public class PlayFragment extends Fragment {
         btnPrevious.setOnClickListener(v -> playPreviousSong());
         btnNext.setOnClickListener(v -> playNextSong());
 
+        likeButton.setOnClickListener(v -> toggleLike());
+
     }
 
     private void updateSongInfo(Song song) {
@@ -160,7 +173,7 @@ public class PlayFragment extends Fragment {
                 .load(song.getCover())
                 .placeholder(R.drawable.ic_album_placeholder)
                 .into(albumCover);
-
+        updateLikeButton();
         // Aquí podrías cargar la duración total si está disponible
         // totalTime.setText(formatTime(song.getDuration()));
     }
@@ -248,6 +261,55 @@ public class PlayFragment extends Fragment {
         }
     }
 
+    private void updateLikeButton() {
+        if (isLiked) {
+            likeButton.setImageResource(R.drawable.ic_heart_filled);
+        } else {
+            likeButton.setImageResource(R.drawable.ic_heart_empty);
+        }
+    }
+
+    private void toggleLike() {
+        Song currentSong = songViewModel.getCurrentSong().getValue();
+        if (currentSong == null) return;
+
+        Token token = null;
+        Bundle bundle = getActivity().getIntent().getExtras();
+        if (bundle != null) {
+             token = bundle.getParcelable("token");
+        }
+        Context context = getContext();
+
+        if (isLiked) {
+            SongService.unlikeSong(context, token.getBody(), currentSong.getId(), new SongService.SimpleCallback() {
+                @Override
+                public void onSuccess() {
+                    isLiked = false;
+                    currentSong.setLiked(false);
+                    updateLikeButton();
+                }
+
+                @Override
+                public void onError(String errorMsg) {
+                    Log.e("UNLIKE", errorMsg);
+                }
+            });
+        } else {
+            SongService.likeSong(context, token.getBody(), currentSong.getId(), new SongService.SimpleCallback() {
+                @Override
+                public void onSuccess() {
+                    isLiked = true;
+                    currentSong.setLiked(true);
+                    updateLikeButton();
+                }
+
+                @Override
+                public void onError(String errorMsg) {
+                    Log.e("LIKE", errorMsg);
+                }
+            });
+        }
+    }
 
 
 

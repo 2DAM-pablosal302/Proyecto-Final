@@ -22,4 +22,8 @@ public interface ApiService {
 
     @GET("usuarios")
     Call<List<User>> getUsers(@Header("Authorization") String token);
+
+    @POST("register")
+    Call<RegisterResponse> register(@Body Map<String, String> data);
+
 }

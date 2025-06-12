@@ -23,10 +23,7 @@
         </activity>
 
         <activity android:name=".MainActivity"/>
-        <activity android:name=".Views.PlayFragment"/>
-
-
-        <!-- Para el callback de autenticación de Spotify -->
+        <activity android:name=".Views.RegisterActivity"/>
 
     </application>
 </manifest>

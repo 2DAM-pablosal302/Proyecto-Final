@@ -24,6 +24,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public interface OnPlaylistClickListener {
         void onPlaylistClick(Playlist playlist);
         void onPlaylistOptionsClick(Playlist playlist, View anchorView);
+        void onPlaylistDeleteClick(Playlist playlist, int position);
     }
 
     public PlaylistAdapter(List<Playlist> playlists, OnPlaylistClickListener listener) {
@@ -43,6 +44,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
         Playlist playlist = playlists.get(position);
         holder.bind(playlist, listener);
+
+        holder.btnDeletePlaylist.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onPlaylistDeleteClick(playlist, position);
+            }
+        });
     }
 
     @Override
@@ -62,6 +69,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         private final TextView songCountTextView;
         private final ImageView coverImageView;
         private final ImageView optionsImageView;
+        public ImageView btnDeletePlaylist;
 
         public PlaylistViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -70,6 +78,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             songCountTextView = itemView.findViewById(R.id.songCount);
             coverImageView = itemView.findViewById(R.id.playlistCover);
             optionsImageView = itemView.findViewById(R.id.optionsButton);
+            btnDeletePlaylist = itemView.findViewById(R.id.btnDeletePlaylist);
         }
 
         public void bind(Playlist playlist, OnPlaylistClickListener listener) {
@@ -84,5 +93,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             optionsImageView.setOnClickListener(v -> 
                 listener.onPlaylistOptionsClick(playlist, optionsImageView));
         }
+
+    }
+
+    public void removeItem(int position) {
+        playlists.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, playlists.size());
     }
 }

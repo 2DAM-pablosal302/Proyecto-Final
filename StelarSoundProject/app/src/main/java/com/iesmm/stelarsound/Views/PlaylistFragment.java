@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
     private PlaylistAdapter playlistAdapter;
     private Token token;
     private FloatingActionButton addPlaylistBtn;
+    private ImageButton btnDeletePlaylist;
 
 
     @Override
@@ -77,6 +79,7 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
 
         addPlaylistBtn = view.findViewById(R.id.addButton);
         addPlaylistBtn.setOnClickListener(v -> showCreatePlaylistDialog());
+
 
         return view;
     }
@@ -266,6 +269,44 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
                 Toast.makeText(getContext(), "Error al crear playlist: " + message, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onPlaylistDeleteClick(Playlist playlist, int position) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Eliminar playlist")
+                .setMessage("¿Estás seguro de que quieres eliminar '" + playlist.getName() + "'?")
+                .setPositiveButton("Eliminar", (dialog, which) -> {
+                    deletePlaylist(playlist.getId(), position);
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void deletePlaylist(int playlistId, int position) {
+        PlaylistService.deletePlaylist(requireContext(), token.getBody(), playlistId,
+                new PlaylistService.PlaylistDeleteCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                            // Eliminar de la lista local y actualizar el RecyclerView
+                            playlistAdapter.removeItem(position);
+
+                            // Mostrar estado vacío si es necesario
+                            if (playlistAdapter.getItemCount() == 0) {
+                                showEmptyState();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                        });
+                    }
+                });
     }
 
 

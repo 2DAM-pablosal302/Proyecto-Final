@@ -1,5 +1,6 @@
 package com.iesmm.stelarsound.Models;
 
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,6 +25,8 @@ public class Song implements Parcelable {
 
     @SerializedName("audio_url")  // <-- importante
     private String audio;
+    private boolean liked;
+
 
     public Song() {
     }
@@ -35,6 +38,9 @@ public class Song implements Parcelable {
         album = in.readString();
         cover = in.readString();
         audio = in.readString();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            liked = in.readBoolean();
+        }
     }
 
     public static final Creator<Song> CREATOR = new Creator<Song>() {
@@ -96,6 +102,14 @@ public class Song implements Parcelable {
     public void setAudio(String audio) {
         this.audio = audio;
     }
+    public boolean isLiked() {
+        return liked;
+    }
+
+    public void setLiked(boolean liked) {
+        this.liked = liked;
+    }
+
 
     @Override
     public int describeContents() {
@@ -110,6 +124,9 @@ public class Song implements Parcelable {
         dest.writeString(album);
         dest.writeString(cover);
         dest.writeString(audio);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            dest.writeBoolean(liked);
+        }
     }
 
     @Override
