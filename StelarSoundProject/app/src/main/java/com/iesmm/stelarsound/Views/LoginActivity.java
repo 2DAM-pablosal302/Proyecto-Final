@@ -151,7 +151,7 @@ public class LoginActivity extends AppCompatActivity {
                     goToMain(user, token);
                 } else {
                     Log.e("LOGIN_FAIL", "Credenciales incorrectas");
-
+                    Toast.makeText(getApplicationContext(), "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
                 }
             }
 
