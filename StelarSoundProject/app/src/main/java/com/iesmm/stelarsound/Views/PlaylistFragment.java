@@ -266,7 +266,12 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
 
             @Override
             public void onError(String message) {
-                Toast.makeText(getContext(), "Error al crear playlist: " + message, Toast.LENGTH_SHORT).show();
+                if(message.equals("Fallo on_count")){
+                    Toast.makeText(getContext(), "Playlist creada " , Toast.LENGTH_SHORT).show();
+                    loadPlaylists();
+                }else{
+                    Toast.makeText(getContext(), "Error al crear playlist: " + message, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:translationY="440dp"
+        android:translationY="380dp"
         app:cardCornerRadius="28dp"
         app:cardElevation="8dp"
         app:cardBackgroundColor="@color/white">
@@ -137,28 +137,6 @@
                     android:inputType="textPassword"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Opciones de recordar/olvidar contraseña -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
-
-                <com.google.android.material.checkbox.MaterialCheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Remember me"
-                    android:textColor="@color/gray_600"
-                    app:buttonTint="@color/verde_primario"
-                    android:layout_centerVertical="true"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="I forgot my password"
-                    android:textColor="@color/verde_primario"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"/>
-            </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"

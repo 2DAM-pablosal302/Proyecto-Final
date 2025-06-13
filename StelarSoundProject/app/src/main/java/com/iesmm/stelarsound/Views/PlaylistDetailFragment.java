@@ -92,6 +92,7 @@ public class PlaylistDetailFragment extends Fragment implements PlaylistSongAdap
         addSongBtn.setOnClickListener(v -> {
             com.iesmm.stelarsound.Views.SongPickerDialogFragment dialog = com.iesmm.stelarsound.Views.SongPickerDialogFragment.newInstance(playlistId, authToken);
             dialog.show(getParentFragmentManager(), "SongPickerDialog");
+            loadPlaylistDetails();
         });
 
 

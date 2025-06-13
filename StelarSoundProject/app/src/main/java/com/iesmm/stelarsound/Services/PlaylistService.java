@@ -319,8 +319,13 @@ public class PlaylistService {
 
                         callback.onSuccess(playlist);
                     } catch (JSONException e) {
-                        callback.onError("Error al procesar la respuesta del servidor");
+
                         Log.e("PlaylistService", "JSON Error: " + e.getMessage());
+                        if(!e.getMessage().equals("No value for song_count")){
+                            callback.onError("Error al procesar la respuesta del servidor");
+                        }else{
+                            callback.onError("Fallo on_count");
+                        }
                     }
                 },
                 error -> {
