@@ -17,7 +17,7 @@ class SongController extends Controller
     {
         $songs = Song::with(['genre', 'likedByUsers'])->get();
 
-        // Transformamos las URLs para que sean completas
+
         return $songs->map(function ($song) {
             return [
                 'id' => $song->id,
@@ -35,23 +35,23 @@ class SongController extends Controller
     }
 
     public function search(Request $request)
-{
-    
+    {
 
-    $search = $request->query('q');
-    if (empty($search)) {
-        return response()->json(['message' => 'Debe proporcionar un término de búsqueda'], 400);
-    }
 
-    $songs = Song::with(['genre', 'likedByUsers'])
-        ->where(function ($q) use ($search) {
-            $q->where('title', 'like', "%{$search}%")
-              ->orWhere('artist', 'like', "%{$search}%")
-              ->orWhere('album', 'like', "%{$search}%");
-        })
-        ->get();
+        $search = $request->query('q');
+        if (empty($search)) {
+            return response()->json(['message' => 'Debe proporcionar un término de búsqueda'], 400);
+        }
 
-    return $songs->map(function ($song) {
+        $songs = Song::with(['genre', 'likedByUsers'])
+            ->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('artist', 'like', "%{$search}%")
+                    ->orWhere('album', 'like', "%{$search}%");
+            })
+            ->get();
+
+        return $songs->map(function ($song) {
             return [
                 'id' => $song->id,
                 'title' => $song->title,
@@ -65,7 +65,7 @@ class SongController extends Controller
                 'liked_by_users' => $song->likedByUsers
             ];
         });
-}
+    }
 
 
 
@@ -83,10 +83,10 @@ class SongController extends Controller
             'audio' => 'required|file|mimetypes:audio/mpeg,audio/wav,audio/mp3|max:51200'
         ]);
 
-        // Procesar la imagen de portada
+
         $coverPath = $this->storeCover($request->file('cover'));
 
-        // Procesar el archivo de audio
+
         $audioPath = $this->storeAudio($request->file('audio'));
 
         $songData = [
@@ -137,18 +137,18 @@ class SongController extends Controller
             'audio' => 'sometimes|file|mimetypes:audio/mpeg,audio/wav,audio/mp3|max:51200'
         ]);
 
-        // Actualizar cover si se proporciona
+
         if ($request->hasFile('cover')) {
-            // Eliminar el cover anterior si existe
+
             if ($song->cover_url && Storage::exists($song->cover_url)) {
                 Storage::delete($song->cover_url);
             }
             $validated['cover_url'] = $this->storeCover($request->file('cover'));
         }
 
-        // Actualizar audio si se proporciona
+
         if ($request->hasFile('audio')) {
-            // Eliminar el audio anterior si existe
+
             if ($song->audio_url && Storage::exists($song->audio_url)) {
                 Storage::delete($song->audio_url);
             }
@@ -165,7 +165,7 @@ class SongController extends Controller
      */
     public function destroy(Song $song)
     {
-        // Eliminar archivos asociados
+
         if ($song->cover_url && Storage::exists($song->cover_url)) {
             Storage::delete($song->cover_url);
         }
@@ -182,36 +182,36 @@ class SongController extends Controller
      * Like a song
      */
     public function like($songId, Request $request)
-{
-    $song = Song::findOrFail($songId);
-    // Evita duplicar likes
-    if (!$request->user()->likes()->where('song_id', $song->id)->exists()) {
-        $request->user()->likes()->attach($song->id);
-    }
+    {
+        $song = Song::findOrFail($songId);
 
-    return response()->json(['message' => 'Song liked']);
-}
+        if (!$request->user()->likes()->where('song_id', $song->id)->exists()) {
+            $request->user()->likes()->attach($song->id);
+        }
+
+        return response()->json(['message' => 'Song liked']);
+    }
 
 
     /**
      * Unlike a song
      */
     public function unlike($songId, Request $request)
-{
-    $user = $request->user();
-    $song = Song::findOrFail($songId);
-    \Log::info('Usuario:', ['id' => $user->id]);
-    \Log::info('Canción:', ['id' => $song->id]);
+    {
+        $user = $request->user();
+        $song = Song::findOrFail($songId);
+        \Log::info('Usuario:', ['id' => $user->id]);
+        \Log::info('Canción:', ['id' => $song->id]);
 
-    if ($user->likes()->where('song_id', $song->id)->exists()) {
-        $user->likes()->detach($song->id);
-        \Log::info('Like eliminado');
-    } else {
-        \Log::info('No existe like para eliminar');
+        if ($user->likes()->where('song_id', $song->id)->exists()) {
+            $user->likes()->detach($song->id);
+            \Log::info('Like eliminado');
+        } else {
+            \Log::info('No existe like para eliminar');
+        }
+
+        return response()->json(['message' => 'Song unliked']);
     }
-
-    return response()->json(['message' => 'Song unliked']);
-}
 
 
     /**
@@ -219,10 +219,10 @@ class SongController extends Controller
      */
     private function storeCover($file)
     {
-        // Generar nombre único para el archivo
+
         $filename = 'cover_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-        // Redimensionar y guardar la imagen
+
         $image = Image::make($file)->resize(500, 500, function ($constraint) {
             $constraint->aspectRatio();
             $constraint->upsize();
@@ -238,10 +238,10 @@ class SongController extends Controller
      */
     private function storeAudio($file)
     {
-        // Generar nombre único para el archivo
+
         $filename = 'audio_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-        // Guardar el archivo
+
         $path = $file->storeAs('audio', $filename, 'public');
 
         return $path;

@@ -89,7 +89,7 @@ public class PlaylistSongAdapter extends RecyclerView.Adapter<PlaylistSongAdapte
 
         public void bind(Song song, int position, OnSongClickListener listener) {
             songNumber.setText(String.valueOf(position));
-            // Cargar imagen de la canción
+
             Glide.with(itemView.getContext())
                     .load(song.getCover())
                     .placeholder(R.drawable.ic_music_note)

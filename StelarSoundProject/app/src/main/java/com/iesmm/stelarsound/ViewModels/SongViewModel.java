@@ -35,7 +35,7 @@ public class SongViewModel extends ViewModel {
 
         List<Song> newList = new ArrayList<>(currentList);
 
-        // Verificar duplicado consecutivo
+
         if (!newList.isEmpty()) {
             Song last = newList.get(newList.size() - 1);
             boolean isDuplicate = last.getTitle().equals(song.getTitle()) &&
@@ -47,7 +47,7 @@ public class SongViewModel extends ViewModel {
             }
         }
 
-        // Eliminar cualquier instancia anterior de la misma canción (por ID, título y artista o lo que prefieras)
+
         for (int i = 0; i < newList.size(); i++) {
             Song s = newList.get(i);
             if (s.getTitle().equals(song.getTitle()) && s.getArtist().equals(song.getArtist())) {
@@ -56,16 +56,16 @@ public class SongViewModel extends ViewModel {
             }
         }
 
-        // Añadir al final
+
         newList.add(song);
 
-        // Limitar a las últimas 10 canciones
+
         if (newList.size() > 10) {
             newList.remove(0);
         }
 
         Log.d("SongViewModel", "Canción añadida a historial: " + song.getTitle());
-        recentlyPlayed.setValue(newList); // Notifica a los observers
+        recentlyPlayed.setValue(newList);
     }
 
 

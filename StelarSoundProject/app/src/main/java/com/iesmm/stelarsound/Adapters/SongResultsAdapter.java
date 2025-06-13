@@ -73,7 +73,6 @@ public class SongResultsAdapter extends RecyclerView.Adapter<SongResultsAdapter.
             songTitleTextView.setText(song.getTitle());
             songArtistTextView.setText(song.getArtist());
 
-            // Cargar imagen de la canción
             Glide.with(itemView.getContext())
                     .load(song.getCover())
                     .placeholder(R.drawable.ic_music_note)

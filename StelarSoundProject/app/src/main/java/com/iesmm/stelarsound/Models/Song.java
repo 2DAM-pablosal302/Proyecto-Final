@@ -20,10 +20,10 @@ public class Song implements Parcelable {
     @SerializedName("album")
     private String album;
 
-    @SerializedName("cover_url")  // <-- importante
+    @SerializedName("cover_url")
     private String cover;
 
-    @SerializedName("audio_url")  // <-- importante
+    @SerializedName("audio_url")
     private String audio;
     private boolean liked;
 

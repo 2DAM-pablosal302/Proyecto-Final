@@ -116,7 +116,6 @@
                 </table>
             </div>
             
-            <!-- Paginación -->
             
         </div>
     </div>

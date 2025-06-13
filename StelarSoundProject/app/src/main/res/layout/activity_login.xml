@@ -42,7 +42,7 @@
             android:translationY="30dp"/>
     </LinearLayout>
 
-    <!-- Tarjeta de login deslizable (inicialmente escondida) 440-->
+    <!-- Tarjeta de login deslizable  440-->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view"
         android:layout_width="match_parent"

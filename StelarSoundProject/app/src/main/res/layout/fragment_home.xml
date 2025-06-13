@@ -30,7 +30,7 @@
                     android:layout_marginBottom="8dp"/>
 
 
-                <!-- Sección Populares -->
+                <!-- Sección Canciones -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

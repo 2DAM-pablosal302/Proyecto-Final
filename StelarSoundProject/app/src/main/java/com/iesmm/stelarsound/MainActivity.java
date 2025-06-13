@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         songViewModel = new ViewModelProvider(this).get(SongViewModel.class);
         startProgressUpdates();
 
-        // Cargar fragment inicial si es la primera vez
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new HomeFragment())

@@ -186,7 +186,6 @@ public class PlaylistDetailFragment extends Fragment implements PlaylistSongAdap
 
     @Override
     public void onDeleteClick(int songId, int position) {
-        // Mostrar diálogo de confirmación antes de eliminar
         new AlertDialog.Builder(requireContext())
                 .setTitle("Eliminar canción")
                 .setMessage("¿Estás seguro de que quieres eliminar esta canción de la playlist?")

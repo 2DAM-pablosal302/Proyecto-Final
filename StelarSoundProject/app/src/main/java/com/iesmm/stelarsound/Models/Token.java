@@ -6,11 +6,10 @@ import android.os.Parcelable;
 public class Token implements Parcelable {
     private String body;
 
-    // Constructor vacío
+
     public Token() {
     }
 
-    // Constructor completo (opcional)
     public Token(String body) {
         this.body = body;
     }
@@ -42,7 +41,7 @@ public class Token implements Parcelable {
         return 0;
     }
 
-    // Getters y Setters
+
     public String getBody() {
         return body;
     }

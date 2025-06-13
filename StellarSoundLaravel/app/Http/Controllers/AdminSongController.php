@@ -35,37 +35,37 @@ class AdminSongController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'artist' => 'required|string|max:255',
-        'album' => 'required|string|max:255',
-        'id_genre' => 'required|exists:genres,id',
-        'cover' => 'required|image|max:2048',
-        'audio' => 'required|mimes:mp3,wav|max:10240',
-    ]);
+            'title' => 'required|string|max:255',
+            'artist' => 'required|string|max:255',
+            'album' => 'required|string|max:255',
+            'id_genre' => 'required|exists:genres,id',
+            'cover' => 'required|image|max:2048',
+            'audio' => 'required|mimes:mp3,wav|max:10240',
+        ]);
 
-    try {
-        $coverPath = $request->file('cover')->store('covers', 'public');
-    } catch (\Exception $e) {
-        return back()->withErrors(['cover' => 'Error al subir la portada: ' . $e->getMessage()]);
+        try {
+            $coverPath = $request->file('cover')->store('covers', 'public');
+        } catch (\Exception $e) {
+            return back()->withErrors(['cover' => 'Error al subir la portada: ' . $e->getMessage()]);
+        }
+
+        try {
+            $audioPath = $request->file('audio')->store('audio', 'public');
+        } catch (\Exception $e) {
+            return back()->withErrors(['audio' => 'Error al subir el audio: ' . $e->getMessage()]);
+        }
+
+        Song::create([
+            'title' => $validated['title'],
+            'artist' => $validated['artist'],
+            'album' => $validated['album'],
+            'id_genre' => $validated['id_genre'],
+            'cover_url' => $coverPath,
+            'audio_url' => $audioPath,
+        ]);
+
+        return redirect()->route('songs.index')->with('success', 'Canción creada con éxito.');
     }
-
-    try {
-        $audioPath = $request->file('audio')->store('audio', 'public');
-    } catch (\Exception $e) {
-        return back()->withErrors(['audio' => 'Error al subir el audio: ' . $e->getMessage()]);
-    }
-
-    Song::create([
-        'title' => $validated['title'],
-        'artist' => $validated['artist'],
-        'album' => $validated['album'],
-        'id_genre' => $validated['id_genre'],
-        'cover_url' => $coverPath,
-        'audio_url' => $audioPath,
-    ]);
-
-    return redirect()->route('songs.index')->with('success', 'Canción creada con éxito.');
-}
 
     /**
      * Display the specified resource.
@@ -91,34 +91,34 @@ class AdminSongController extends Controller
     public function update(Request $request, Song $song)
     {
         $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'artist' => 'required|string|max:255',
-        'album' => 'required|string|max:255',
-        'id_genre' => 'required|exists:genres,id',
-        'cover' => 'nullable|image|max:2048',
-        'audio' => 'nullable|mimes:mp3,wav|max:10240',
-    ]);
+            'title' => 'required|string|max:255',
+            'artist' => 'required|string|max:255',
+            'album' => 'required|string|max:255',
+            'id_genre' => 'required|exists:genres,id',
+            'cover' => 'nullable|image|max:2048',
+            'audio' => 'nullable|mimes:mp3,wav|max:10240',
+        ]);
 
-    if ($request->hasFile('cover')) {
-        Storage::disk('public')->delete($song->cover_url);
-        $song->cover_url = $request->file('cover')->store('covers', 'public');
-    }
+        if ($request->hasFile('cover')) {
+            Storage::disk('public')->delete($song->cover_url);
+            $song->cover_url = $request->file('cover')->store('covers', 'public');
+        }
 
-    if ($request->hasFile('audio')) {
-        Storage::disk('public')->delete($song->audio_url);
-        $song->audio_url = $request->file('audio')->store('audio', 'public');
-    }
+        if ($request->hasFile('audio')) {
+            Storage::disk('public')->delete($song->audio_url);
+            $song->audio_url = $request->file('audio')->store('audio', 'public');
+        }
 
-    $song->update([
-        'title' => $validated['title'],
-        'artist' => $validated['artist'],
-        'album' => $validated['album'],
-        'id_genre' => $validated['id_genre'],
-        'cover_url' => $song->cover_url,
-        'audio_url' => $song->audio_url,
-    ]);
+        $song->update([
+            'title' => $validated['title'],
+            'artist' => $validated['artist'],
+            'album' => $validated['album'],
+            'id_genre' => $validated['id_genre'],
+            'cover_url' => $song->cover_url,
+            'audio_url' => $song->audio_url,
+        ]);
 
-    return redirect()->route('songs.index')->with('success', 'Canción actualizada.');
+        return redirect()->route('songs.index')->with('success', 'Canción actualizada.');
     }
 
     /**
@@ -126,9 +126,8 @@ class AdminSongController extends Controller
      */
     public function destroy(Song $song)
     {
-            Storage::disk('public')->delete([$song->cover_url, $song->audio_url]);
-    $song->delete();
-    return redirect()->route('songs.index')->with('success', 'Canción eliminada.');
-
+        Storage::disk('public')->delete([$song->cover_url, $song->audio_url]);
+        $song->delete();
+        return redirect()->route('songs.index')->with('success', 'Canción eliminada.');
     }
 }

@@ -22,7 +22,7 @@ public class CancionAdapter extends RecyclerView.Adapter<CancionAdapter.ViewHold
     private OnPlayButtonClickListener playButtonClickListener;
     private int currentlyPlayingPosition = -1;
 
-    // Interfaz simplificada solo para el botón de play
+
     public interface OnPlayButtonClickListener {
         void onPlayButtonClick(int position, Song song);
     }
@@ -59,7 +59,7 @@ public class CancionAdapter extends RecyclerView.Adapter<CancionAdapter.ViewHold
         holder.album.setText(cancion.getAlbum());
         Glide.with(context).load(cancion.getCover()).into(holder.portada);
 
-        // Actualizar el estado del botón play/pause
+
         if (position == currentlyPlayingPosition) {
             holder.botonPlay.setImageResource(R.drawable.ic_pause_circle);
         } else {
@@ -78,12 +78,12 @@ public class CancionAdapter extends RecyclerView.Adapter<CancionAdapter.ViewHold
         return canciones.size();
     }
 
-    // Metodo para actualizar la posición de la canción que se está reproduciendo
+
     public void setCurrentlyPlayingPosition(int position) {
         int previousPosition = currentlyPlayingPosition;
         currentlyPlayingPosition = position;
 
-        // Notificar cambios para actualizar los botones
+
         if (previousPosition != -1) {
             notifyItemChanged(previousPosition);
         }

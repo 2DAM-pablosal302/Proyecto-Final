@@ -160,7 +160,7 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
         Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
     }
 
-    // Estados de la UI
+
     private void showInitialState() {
         progressBar.setVisibility(View.GONE);
         searchResultsRecyclerView.setVisibility(View.GONE);
@@ -215,8 +215,8 @@ public class SearchFragment extends Fragment implements SongResultsAdapter.OnSon
         if (activity != null) {
             try {
                 activity.mediaPlayer.reset();
-                activity.mediaPlayer.setDataSource(song.getAudio()); // <-- IMPORTANTE: usa getAudio() o el campo correcto
-                activity.mediaPlayer.prepare(); // o prepareAsync si quieres hacerlo en background
+                activity.mediaPlayer.setDataSource(song.getAudio());
+                activity.mediaPlayer.prepare();
                 activity.mediaPlayer.start();
 
                 songViewModel.setIsPlaying(true);

@@ -10,11 +10,10 @@ public class User implements Parcelable {
     private String password;
     private String role;
 
-    // Constructor vacío (necesario)
     public User() {
     }
 
-    // Constructor con todos los campos (opcional, pero útil)
+
     public User(int id, String name, String email, String password, String role) {
         this.id = id;
         this.name = name;
@@ -23,7 +22,7 @@ public class User implements Parcelable {
         this.role = role;
     }
 
-    // Constructor desde Parcel
+
     protected User(Parcel in) {
         id = in.readInt();
         name = in.readString();
@@ -32,7 +31,6 @@ public class User implements Parcelable {
         role = in.readString();
     }
 
-    // Parcelable.Creator
     public static final Creator<User> CREATOR = new Creator<User>() {
         @Override
         public User createFromParcel(Parcel in) {
@@ -45,7 +43,7 @@ public class User implements Parcelable {
         }
     };
 
-    // Métodos Parcelable
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
@@ -60,7 +58,7 @@ public class User implements Parcelable {
         return 0;
     }
 
-    // Getters y Setters
+
     public int getId() {
         return id;
     }

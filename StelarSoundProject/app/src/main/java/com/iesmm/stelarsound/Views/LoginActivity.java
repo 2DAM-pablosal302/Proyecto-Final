@@ -59,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         TextView title = findViewById(R.id.stellarTitle);
         title.post(() -> {
             Shader shader = new LinearGradient(
-                    0, 0, title.getWidth(), 0, // horizontal: desde el borde izquierdo al derecho
+                    0, 0, title.getWidth(), 0,
                     new int[]{Color.parseColor("#F3E5F5"), Color.parseColor("#4A148C")},
                     null,
                     Shader.TileMode.CLAMP // evita el efecto espejo
@@ -76,7 +76,6 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         });
 
-        // Configuración del arrastre
         dragHandle.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -89,22 +88,18 @@ public class LoginActivity extends AppCompatActivity {
                         float deltaY = event.getRawY() - initialTouchY;
                         float newY = initialY + deltaY;
 
-                        // Limitar el movimiento hacia arriba
                         if (newY < 0) newY = 0;
 
                         cardView.setTranslationY(newY);
                         return true;
                     case MotionEvent.ACTION_UP:
-                        // Determinar si la tarjeta debe quedarse arriba o abajo
                         float currentY = cardView.getTranslationY();
                         float cardHeight = cardView.getHeight();
 
                         if (currentY < cardHeight / 2) {
-                            // Animación para subir completamente
                             animateCardUp();
                             isCardUp = true;
                         } else {
-                            // Animación para bajar completamente
                             animateCardDown();
                             isCardUp = false;
                         }
@@ -114,7 +109,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Mostrar la tarjeta después de un breve retraso
         new Handler().postDelayed(() -> {
             animateCardUp();
             isCardUp = true;

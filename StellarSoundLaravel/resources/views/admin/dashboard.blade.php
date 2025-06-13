@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-    <!-- Header con breadcrumb -->
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 fw-bold text-primary mb-0">Panel de Administración</h1>
@@ -79,7 +79,7 @@
 
     </div>
 
-    <!-- Sección adicional para gráficos/estadísticas -->
+    <!-- Sección gráficos/estadísticas -->
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm h-100">
@@ -106,7 +106,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Datos para top canciones
+
     const topSongsLabels = @json($topSongs->pluck('title'));
     const topSongsLikes = @json($topSongs->pluck('likes_count'));
 
@@ -139,7 +139,6 @@
         }
     });
 
-    // Datos para géneros
     const genreLabels = @json($genres->pluck('name'));
     const genreCounts = @json($genres->pluck('songs_count'));
 

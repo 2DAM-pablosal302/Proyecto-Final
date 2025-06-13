@@ -159,7 +159,6 @@ public class PlaylistService {
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.POST, url, requestBody,
                 response -> {
-                    // Actualizar la lista de canciones después de añadir
                     getPlaylistSongs(context, token, playlistId, callback);
                 },
                 error -> {
@@ -416,9 +415,8 @@ public class PlaylistService {
             }
         };
 
-        // Configura política de reintentos
         request.setRetryPolicy(new DefaultRetryPolicy(
-                10000,  // 10 segundos timeout
+                10000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
         ));
@@ -427,7 +425,7 @@ public class PlaylistService {
         queue.add(request);
     }
 
-    // Interface para el callback
+
     public interface PlaylistDeleteCallback {
         void onSuccess(String message);
         void onError(String error);

@@ -116,16 +116,16 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         });
     }
 
-    // View States
+
     private void showLoading() {
         playlistsRecyclerView.setVisibility(View.GONE);
         emptyState.setVisibility(View.GONE);
         errorState.setVisibility(View.GONE);
-        // Aquí podrías mostrar un ProgressBar si lo agregas al layout
+
     }
 
     private void hideLoading() {
-        // Ocultar ProgressBar si lo estás usando
+
     }
 
     private void showContent() {
@@ -212,14 +212,14 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
     private Uri selectedCoverUri = null;
 
     private void showCreatePlaylistDialog() {
-        // Inflamos un layout personalizado para el diálogo
+
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_create_playlist, null);
 
         EditText input = dialogView.findViewById(R.id.editTextPlaylistName);
         ImageView coverImage = dialogView.findViewById(R.id.imageViewCover);
 
         coverImage.setOnClickListener(v -> {
-            // Abrir selector de imágenes
+
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(intent, PICK_IMAGE_REQUEST_CODE);
         });
@@ -231,7 +231,7 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         builder.setPositiveButton("Crear", (dialog, which) -> {
             String name = input.getText().toString().trim();
             if (!name.isEmpty()) {
-                // Pasamos la URI en string o null si no se seleccionó imagen
+
                 createPlaylist(name, selectedCoverUri != null ? selectedCoverUri.toString() : null);
             } else {
                 Toast.makeText(getContext(), "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show();
@@ -243,15 +243,13 @@ public class PlaylistFragment extends Fragment implements PlaylistAdapter.OnPlay
         builder.show();
     }
 
-    // Recibimos el resultado del selector de imágenes
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             selectedCoverUri = data.getData();
-            // Actualizar la imagen en el diálogo (si está visible)
-            // Para eso necesitarías guardar referencia al ImageView o usar un campo global, o abrir un nuevo diálogo
-            // Por simplicidad puedes refrescar el dialogo o usar otro mecanismo
+
         }
     }
 

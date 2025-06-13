@@ -39,7 +39,7 @@ public abstract class VolleyMultipartRequest extends Request<NetworkResponse> {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try {
-            // Text params
+
             Map<String, String> params = getParams();
             if (params != null && !params.isEmpty()) {
                 for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -50,7 +50,7 @@ public abstract class VolleyMultipartRequest extends Request<NetworkResponse> {
                 }
             }
 
-            // Binary data
+
             Map<String, DataPart> data = getByteData();
             if (data != null && !data.isEmpty()) {
                 for (Map.Entry<String, DataPart> entry : data.entrySet()) {
@@ -95,7 +95,7 @@ public abstract class VolleyMultipartRequest extends Request<NetworkResponse> {
     private final String boundary = "apiclient-" + System.currentTimeMillis();
     private static final String LINE_FEED = "\r\n";
 
-    // Nested class to hold file data
+
     public static class DataPart {
         private final String fileName;
         private final byte[] content;

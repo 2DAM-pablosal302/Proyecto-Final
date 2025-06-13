@@ -8,13 +8,12 @@
         @csrf
         @method('PUT')
 
-        <!-- Nombre -->
+ 
         <div class="mb-3">
             <label for="name" class="form-label">Nombre de la Playlist</label>
             <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $playlist->name) }}" required>
         </div>
 
-        <!-- Usuario -->
         <div class="mb-3">
             <label for="id_user" class="form-label">Usuario</label>
             <select class="form-select" id="id_user" name="id_user" required>
@@ -26,13 +25,12 @@
             </select>
         </div>
 
-        <!-- Cover actual -->
         <div class="mb-3">
             <label class="form-label">Portada actual:</label><br>
             <img src="{{ asset('storage' . $playlist->cover_url) }}" alt="Cover" width="120">
         </div>
 
-        <!-- Nueva Cover -->
+
         <div class="mb-3">
             <label for="cover_url" class="form-label">Cambiar imagen (opcional)</label>
             <input type="file" class="form-control" id="cover_url" name="cover_url">

@@ -41,7 +41,6 @@ public class HomeFragment extends Fragment {
         recentRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
 
-        // Obtener token del intent de la actividad
         Bundle bundle = getActivity().getIntent().getExtras();
         if (bundle != null) {
             Token token = bundle.getParcelable("token");
@@ -58,7 +57,7 @@ public class HomeFragment extends Fragment {
         songViewModel.getRecentlyPlayed().observe(getViewLifecycleOwner(), recentSongs -> {
             Log.d("HomeFragment", "Historial actualizado: " + recentSongs.size());
             if (recentSongs != null) {
-                recentAdapter.setCanciones(recentSongs); // Actualiza el adapter con los nuevos datos
+                recentAdapter.setCanciones(recentSongs);
             }
         });
 
@@ -96,24 +95,21 @@ public class HomeFragment extends Fragment {
 
         if (adapter.getCurrentlyPlayingPosition() == position) {
             if (mediaPlayer.isPlaying()) {
-                // Pausar la reproducción
                 mediaPlayer.pause();
                 songViewModel.setIsPlaying(false);
             } else {
-                // Reanudar la reproducción desde la posición actual
                 mediaPlayer.start();
                 songViewModel.setIsPlaying(true);
-                updateProgress(mediaPlayer); // Reanudar actualizaciones de progreso
+                updateProgress(mediaPlayer);
             }
         }
-        // Si es una canción diferente
+
         else {
-            // Si hay otra canción reproduciéndose, detenerla primero
+
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
             }
 
-            // Preparar y reproducir la nueva canción
             reproducirCancion(mediaPlayer, song.getAudio());
             adapter.setCurrentlyPlayingPosition(position);
             songViewModel.setCurrentSong(song);
@@ -157,13 +153,12 @@ public class HomeFragment extends Fragment {
                     int currentPos = mediaPlayer.getCurrentPosition();
                     songViewModel.setCurrentPosition(currentPos);
 
-                    // Programar la próxima actualización
-                    handler.postDelayed(this, 1000); // Actualizar cada segundo
+                    handler.postDelayed(this, 1000);
                 }
             }
         };
 
-        // Iniciar las actualizaciones
+
         handler.post(updateRunnable);
     }
 }

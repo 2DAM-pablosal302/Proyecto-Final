@@ -42,7 +42,6 @@ public class PlayFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play, container, false);
 
-        // Inicializar vistas
         albumCover = view.findViewById(R.id.album_cover);
         songTitle = view.findViewById(R.id.song_title);
         artistName = view.findViewById(R.id.artist_name);
@@ -65,7 +64,6 @@ public class PlayFragment extends Fragment {
 
         songViewModel = new ViewModelProvider(requireActivity()).get(SongViewModel.class);
 
-        // Observar la posición actual
         songViewModel.getCurrentPosition().observe(getViewLifecycleOwner(), position -> {
             if (position != null && progressBar != null) {
                 progressBar.setProgress(position);
@@ -74,7 +72,6 @@ public class PlayFragment extends Fragment {
 
         });
 
-        // Configurar el SeekBar
         progressBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -85,7 +82,7 @@ public class PlayFragment extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Pausar las actualizaciones mientras el usuario mueve la barra
+
                 activity.pauseProgressUpdates();
             }
 
@@ -94,13 +91,13 @@ public class PlayFragment extends Fragment {
                 if (activity.mediaPlayer != null) {
                     activity.mediaPlayer.seekTo(seekBar.getProgress());
                 }
-                // Reanudar actualizaciones
+
                 activity.resumeProgressUpdates();
             }
             private boolean wasPlaying = false;
         });
 
-        // Observar la duración de la canción
+
         songViewModel.getSongDuration().observe(getViewLifecycleOwner(), duration -> {
             if (duration != null) {
                 progressBar.setMax(duration);
@@ -108,7 +105,7 @@ public class PlayFragment extends Fragment {
             }
         });
 
-        // Observar la posición actual
+
         songViewModel.getCurrentPosition().observe(getViewLifecycleOwner(), position -> {
             if (position != null) {
                 progressBar.setProgress(position);
@@ -116,7 +113,7 @@ public class PlayFragment extends Fragment {
             }
         });
 
-        // Observar cambios en la canción actual
+
         songViewModel.getCurrentSong().observe(getViewLifecycleOwner(), song -> {
             if (song != null) {
                 updateSongInfo(song);
@@ -125,32 +122,32 @@ public class PlayFragment extends Fragment {
             }
         });
 
-        // Observar cambios en el estado de reproducción
+
         songViewModel.getIsPlaying().observe(getViewLifecycleOwner(), isPlaying -> {
             if (isPlaying != null) {
                 updatePlayButton(isPlaying);
             }
         });
 
-        // Observar cambios en la posición actual
+
         songViewModel.getCurrentPosition().observe(getViewLifecycleOwner(), position -> {
             if (position != null) {
                 updateProgress(position);
             }
         });
 
-        // Configurar botón de play/pause
+
         playPauseButton.setOnClickListener(v -> {
 
             Boolean isPlaying = songViewModel.getIsPlaying().getValue();
             if (isPlaying != null) {
                 if (isPlaying) {
-                    // Pausar la reproducción
+
                     activity.mediaPlayer.pause();
                 } else {
-                    // Reanudar la reproducción
+
                     activity.mediaPlayer.start();
-                    // No necesitamos actualizar la posición porque ya está guardada
+
                 }
                 songViewModel.setIsPlaying(!isPlaying);
             }
@@ -174,8 +171,7 @@ public class PlayFragment extends Fragment {
                 .placeholder(R.drawable.ic_album_placeholder)
                 .into(albumCover);
         updateLikeButton();
-        // Aquí podrías cargar la duración total si está disponible
-        // totalTime.setText(formatTime(song.getDuration()));
+
     }
 
     private void updatePlayButton(boolean isPlaying) {
@@ -204,7 +200,7 @@ public class PlayFragment extends Fragment {
         }
 
         Song nextSong = queue.remove(0);
-        playSong(nextSong, queue, true); // SÍ añadir al historial
+        playSong(nextSong, queue, true);
 
     }
 
@@ -223,12 +219,12 @@ public class PlayFragment extends Fragment {
             return;
         }
 
-        // Eliminar la canción actual y obtener la anterior
-        history.remove(history.size() - 1); // Eliminar actual
-        Song previous = history.remove(history.size() - 1); // Obtener anterior real
 
-        songViewModel.setCurrentSong(previous); // Actualizar el ViewModel
-        playSong(previous, songViewModel.getQueue().getValue(), false); // NO añadir al historial
+        history.remove(history.size() - 1);
+        Song previous = history.remove(history.size() - 1);
+
+        songViewModel.setCurrentSong(previous);
+        playSong(previous, songViewModel.getQueue().getValue(), false);
         // Reproducir
     }
 

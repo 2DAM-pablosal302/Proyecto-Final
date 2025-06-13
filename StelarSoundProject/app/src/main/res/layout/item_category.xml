@@ -34,7 +34,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Categories Grid (Visible by default) -->
+    <!-- Categories Grid  -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/categoriesRecyclerView"
         android:layout_width="match_parent"
@@ -45,7 +45,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/item_category"/>
 
-    <!-- Search Results (Hidden by default) -->
+    <!-- Search Results  -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchResultsRecyclerView"
         android:layout_width="match_parent"

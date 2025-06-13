@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:background="@color/black">
 
-        <!-- Imagen de portada del álbum (centrada y grande) -->
+        <!-- Imagen de portada del álbum  -->
         <ImageView
             android:id="@+id/album_cover"
             android:layout_width="300dp"

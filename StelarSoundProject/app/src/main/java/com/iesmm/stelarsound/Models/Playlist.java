@@ -14,7 +14,7 @@ public class Playlist implements Parcelable {
     private int songCount;
     private List<Song> songs;
 
-    // Constructores
+
     public Playlist() {
         this.songs = new ArrayList<>();
     }
@@ -47,7 +47,7 @@ public class Playlist implements Parcelable {
         songs = in.createTypedArrayList(Song.CREATOR);
     }
 
-    // Getters y Setters
+
     public int getId() {
         return id;
     }
@@ -96,7 +96,7 @@ public class Playlist implements Parcelable {
         this.songs = songs;
     }
 
-    // Métodos para manejo de canciones
+
     public void addSong(Song song) {
         this.songs.add(song);
         this.songCount++;
