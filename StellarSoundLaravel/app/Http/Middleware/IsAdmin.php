@@ -15,9 +15,17 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(auth()->check() && auth()->user()->role === 'admin'){
-            return $next($request);
+        if (!auth()->check()) {
+        return redirect()->route('login');
         }
-        abort(403, 'Acceso no autorizado');
+
+        if (auth()->user()->role !== 'admin') {
+        auth()->logout(); // opcional: lo deslogueas
+        return redirect()->route('login')->withErrors([
+            'error' => 'No tienes permisos para acceder.'
+        ]);
+        }
+
+        return $next($request);
     }
 }

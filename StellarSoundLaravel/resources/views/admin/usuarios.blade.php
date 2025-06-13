@@ -2,6 +2,20 @@
 
 @section('content')
 <div class="container-fluid px-4 py-4">
+    @if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+@endif
+
     <!-- Header con acciones -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -21,12 +35,12 @@
                 <h5 class="mb-0 fw-semibold">Listado de Usuarios</h5>
                 <div class="d-flex align-items-center">
                     <span class="badge bg-primary me-2">Total: {{ $usuarios->count() }}</span>
-                    <div class="input-group input-group-sm" style="width: 200px;">
-                        <input type="text" class="form-control" placeholder="Buscar...">
-                        <button class="btn btn-outline-secondary" type="button">
+                    <form action="{{ route('users.index') }}" method="GET" class="input-group input-group-sm" style="width: 250px;">
+                        <input type="text" name="buscar" class="form-control" placeholder="Buscar..." value="{{ request('buscar') }}">
+                        <button class="btn btn-outline-secondary" type="submit">
                             <i class="bi bi-search"></i>
                         </button>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>

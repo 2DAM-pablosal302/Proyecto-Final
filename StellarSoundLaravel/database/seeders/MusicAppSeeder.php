@@ -159,19 +159,23 @@ class MusicAppSeeder extends Seeder
         $playlists = [
             [
                 'id_user' => $juan->id,
-                'name' => 'Mis favoritas'
+                'name' => 'Mis favoritas',
+                'cover_url' => 'playlistcovers/favouritecover.png'
             ],
             [
                 'id_user' => $juan->id,
-                'name' => 'Para correr'
+                'name' => 'Para correr',
+                'cover_url' => 'https://example.com/covers/channel-orange.jpg'
             ],
             [
                 'id_user' => $maria->id,
-                'name' => 'Relax'
+                'name' => 'Relax',
+                'cover_url' => 'https://example.com/covers/channel-orange.jpg'
             ],
             [
                 'id_user' => $carlos->id,
-                'name' => 'Fiesta'
+                'name' => 'Fiesta',
+                'cover_url' => 'https://example.com/covers/channel-orange.jpg'
             ],
         ];
         

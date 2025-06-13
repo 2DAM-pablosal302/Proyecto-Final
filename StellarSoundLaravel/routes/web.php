@@ -4,8 +4,9 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\PlaylistController;
-use App\Http\Controllers\SongController;
+use App\Http\Controllers\AdminPlaylistController;
+use App\Http\Controllers\AdminSongController;
+use App\Http\Controllers\AdminController;
 
 
 /*
@@ -25,21 +26,18 @@ Route::get('/', function () {
 
 
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'admin')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    //Funciones fuera de breeze 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
 
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::resource('users', AdminUserController::class);
 
-    Route::resource('playlists', PlaylistController::class);
-    Route::resource('songs', SongController::class);
-    Route::resource('genres', GenreController::class);
+    Route::resource('playlists', AdminPlaylistController::class);
+    Route::resource('songs', AdminSongController::class);
+
 });
 
 

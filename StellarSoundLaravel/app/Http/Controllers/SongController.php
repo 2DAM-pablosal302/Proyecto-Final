@@ -28,6 +28,7 @@ class SongController extends Controller
                 'cover_url' => $song->cover_url ? asset("storage/{$song->cover_url}") : null,
                 'audio_url' => $song->audio_url ? asset("storage/{$song->audio_url}") : null,
                 'genre' => $song->genre,
+                'is_liked' => $song->is_liked,
                 'liked_by_users' => $song->likedByUsers
             ];
         });
@@ -60,6 +61,7 @@ class SongController extends Controller
                 'cover_url' => $song->cover_url ? asset("storage/{$song->cover_url}") : null,
                 'audio_url' => $song->audio_url ? asset("storage/{$song->audio_url}") : null,
                 'genre' => $song->genre,
+                'is_liked' => $song->is_liked,
                 'liked_by_users' => $song->likedByUsers
             ];
         });
@@ -116,6 +118,7 @@ class SongController extends Controller
             'audio_url' => $song->audio_url ? asset("storage/{$song->audio_url}") : null,
             'genre' => $song->genre,
             'playlists' => $song->playlists,
+            'is_liked' => $song->is_liked,
             'liked_by_users' => $song->likedByUsers
         ];
     }
@@ -178,20 +181,38 @@ class SongController extends Controller
     /**
      * Like a song
      */
-    public function like(Song $song, Request $request)
-    {
-        $request->user()->likes()->attach($song);
-        return response()->json(['message' => 'Song liked']);
+    public function like($songId, Request $request)
+{
+    $song = Song::findOrFail($songId);
+    // Evita duplicar likes
+    if (!$request->user()->likes()->where('song_id', $song->id)->exists()) {
+        $request->user()->likes()->attach($song->id);
     }
+
+    return response()->json(['message' => 'Song liked']);
+}
+
 
     /**
      * Unlike a song
      */
-    public function unlike(Song $song, Request $request)
-    {
-        $request->user()->likes()->detach($song);
-        return response()->json(['message' => 'Song unliked']);
+    public function unlike($songId, Request $request)
+{
+    $user = $request->user();
+    $song = Song::findOrFail($songId);
+    \Log::info('Usuario:', ['id' => $user->id]);
+    \Log::info('Canción:', ['id' => $song->id]);
+
+    if ($user->likes()->where('song_id', $song->id)->exists()) {
+        $user->likes()->detach($song->id);
+        \Log::info('Like eliminado');
+    } else {
+        \Log::info('No existe like para eliminar');
     }
+
+    return response()->json(['message' => 'Song unliked']);
+}
+
 
     /**
      * Almacena la imagen de portada y devuelve la ruta relativa

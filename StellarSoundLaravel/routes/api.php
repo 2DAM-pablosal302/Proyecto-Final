@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('songs/search', [SongController::class, 'search'])->middleware('auth:sanctum');
     Route::apiResource('songs', SongController::class);
     Route::post('songs/{song}/like', [SongController::class, 'like'])->middleware('auth:sanctum');
-    Route::post('songs/{song}/unlike', [SongController::class, 'unlike'])->middleware('auth:sanctum');
+    Route::delete('songs/{song}/like', [SongController::class, 'unlike'])->middleware('auth:sanctum');
     
     // Search
     Route::get('/playlists/search', [PlaylistController::class, 'search'])->middleware('auth:sanctum');
@@ -33,12 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/playlists/{playlist}', [PlaylistController::class, 'destroy'])->middleware('auth:sanctum');
     
     // Playlist songs
-    Route::post('/playlists/{playlist}/songs', [PlaylistController::class, 'addSong'])->middleware('auth:sanctum');
-    Route::delete('/playlists/{playlist}/songs', [PlaylistController::class, 'removeSong'])->middleware('auth:sanctum');
+    Route::post('/playlists/{playlist}/songs', [PlaylistController::class, 'addSong']);
+    Route::delete('/playlists/{playlist}/songs/{song}', [PlaylistController::class, 'removeSong'])->middleware('auth:sanctum');
     
     
     Route::post('/logoutAndroid', [AuthController::class, 'logout']);
 });
 
 Route::post('/loginAndroid', [AuthController::class, 'login']);
-Route::get('songs/search', [SongController::class, 'search']);
+Route::post('/register', [UserController::class, 'register']);
